@@ -153,13 +153,13 @@
     },
     {
       "name": "flutter_launcher_icons",
-      "rootUri": "file:///C:/Users/Legion/AppData/Local/Pub/Cache/hosted/pub.dev/flutter_launcher_icons-0.13.1",
+      "rootUri": "file:///C:/Users/Legion/AppData/Local/Pub/Cache/hosted/pub.dev/flutter_launcher_icons-0.14.2",
       "packageUri": "lib/",
-      "languageVersion": "2.18"
+      "languageVersion": "3.0"
     },
     {
       "name": "flutter_lints",
-      "rootUri": "file:///C:/Users/Legion/AppData/Local/Pub/Cache/hosted/pub.dev/flutter_lints-3.0.2",
+      "rootUri": "file:///C:/Users/Legion/AppData/Local/Pub/Cache/hosted/pub.dev/flutter_lints-4.0.0",
       "packageUri": "lib/",
       "languageVersion": "3.1"
     },
@@ -195,9 +195,9 @@
     },
     {
       "name": "go_router",
-      "rootUri": "file:///C:/Users/Legion/AppData/Local/Pub/Cache/hosted/pub.dev/go_router-7.1.1",
+      "rootUri": "file:///C:/Users/Legion/AppData/Local/Pub/Cache/hosted/pub.dev/go_router-14.6.2",
       "packageUri": "lib/",
-      "languageVersion": "2.18"
+      "languageVersion": "3.3"
     },
     {
       "name": "html",
@@ -303,9 +303,9 @@
     },
     {
       "name": "lints",
-      "rootUri": "file:///C:/Users/Legion/AppData/Local/Pub/Cache/hosted/pub.dev/lints-3.0.0",
+      "rootUri": "file:///C:/Users/Legion/AppData/Local/Pub/Cache/hosted/pub.dev/lints-4.0.0",
       "packageUri": "lib/",
-      "languageVersion": "3.0"
+      "languageVersion": "3.1"
     },
     {
       "name": "logging",
@@ -578,7 +578,7 @@
       "languageVersion": "3.4"
     }
   ],
-  "generated": "2024-12-16T05:50:15.708658Z",
+  "generated": "2024-12-16T06:11:33.458911Z",
   "generator": "pub",
   "generatorVersion": "3.4.0",
   "flutterRoot": "file:///C:/flutter",
