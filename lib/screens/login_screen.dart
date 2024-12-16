@@ -1,15 +1,11 @@
-import 'package:fepi_local/JsonModels/users.dart';
 import 'package:fepi_local/constansts/app_colors.dart';
-import 'package:fepi_local/database/database_helper.dart';
+import 'package:fepi_local/constansts/app_text_styles.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-
-
 class LoginScreen extends StatefulWidget {
   static const String routeName = '/login';
-  LoginScreen({Key? key}) : super(key: key);
-  
+  const LoginScreen({Key? key}) : super(key: key);
 
   @override
   _LoginScreenState createState() => _LoginScreenState();
@@ -22,7 +18,13 @@ class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
   bool isLoading = false;
 
-  final DatabaseHelper dbHelper = DatabaseHelper();
+  // Mapa de usuarios con roles
+  final Map<String, Map<String, String>> users = {
+    'Angel': {'rol': 'EC', 'pass': '123456'},
+    'Brenda': {'rol': 'ECAR', 'pass': '456123'},
+    'Carlos': {'rol': 'ECA', 'pass': '789123'},
+    'Diana': {'rol': 'APEC', 'pass': '101123'},
+  };
 
   @override
   void dispose() {
@@ -32,28 +34,40 @@ class _LoginScreenState extends State<LoginScreen> {
     super.dispose();
   }
 
-  void _login() async {
+  void _login() {
     if (_formKey.currentState!.validate()) {
       setState(() {
         isLoading = true;
       });
 
-      Users user = Users(
-        usrName: usernameController.text.trim(),
-        usrPassword: passwordController.text.trim(),
-      );
+      String username = usernameController.text.trim();
+      String password = passwordController.text.trim();
 
-      bool loginSuccess = await dbHelper.login(user);
-
-      setState(() {
-        isLoading = false;
-      });
-
-      if (loginSuccess) {
-        context.go('/aspirantes_home');
+      if (users.containsKey(username) && users[username]!['pass'] == password) {
+        String userRole = users[username]!['rol']!;
+        setState(() {
+          isLoading = false;
+        });
+        // Redirigir según el rol del usuario
+        if (userRole == 'EC') {
+          context.go('/screen__pantalla_pl013_01');
+        } else if (userRole == 'ECAR') {
+          context.go('/ecar_home');
+        } else if (userRole == 'ECA') {
+          context.go('/eca_home');
+        } else if (userRole == 'APEC') {
+          context.go('/apec_home');
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Rol de usuario desconocido', style: AppTextStyles.secondMedium(),)),
+          );
+        }
       } else {
+        setState(() {
+          isLoading = false;
+        });
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Usuario o contraseña incorrectos')),
+          SnackBar(content: Text('Usuario o contraseña incorrectos',style: AppTextStyles.secondMedium())),
         );
       }
     }
@@ -69,12 +83,12 @@ class _LoginScreenState extends State<LoginScreen> {
         color: AppColors.color3,
         child: Stack(
           children: [
-            containerbeige(size),
-            logo(),
-            iconperson(),
-            loginform(context),
+            _containerbeige(size),
+            _logo(),
+            _iconperson(),
+            _loginform(context),
             if (isLoading)
-              Center(
+              const Center(
                 child: CircularProgressIndicator(),
               ),
           ],
@@ -83,7 +97,7 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  SingleChildScrollView loginform(BuildContext context) {
+  SingleChildScrollView _loginform(BuildContext context) {
     return SingleChildScrollView(
       child: Column(
         children: [
@@ -128,8 +142,6 @@ class _LoginScreenState extends State<LoginScreen> {
                         },
                       ),
                       const SizedBox(height: 30),
-
-                      // Campo de contraseña con ValueListenableBuilder
                       ValueListenableBuilder<bool>(
                         valueListenable: isVisibleNotifier,
                         builder: (context, isVisible, child) {
@@ -143,7 +155,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               suffixIcon: IconButton(
                                 onPressed: () {
                                   isVisibleNotifier.value =
-                                  !isVisibleNotifier.value;
+                                      !isVisibleNotifier.value;
                                 },
                                 icon: Icon(isVisible
                                     ? Icons.visibility
@@ -162,7 +174,6 @@ class _LoginScreenState extends State<LoginScreen> {
                           );
                         },
                       ),
-
                       const SizedBox(height: 10),
                       ElevatedButton(
                         style: ElevatedButton.styleFrom(
@@ -179,7 +190,6 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                         onPressed: isLoading ? null : _login,
                       ),
-
                     ],
                   ),
                 )
@@ -196,7 +206,7 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  SafeArea iconperson() {
+  SafeArea _iconperson() {
     return SafeArea(
       child: Container(
         margin: const EdgeInsets.only(top: 60),
@@ -210,7 +220,7 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  Positioned logo() {
+  Positioned _logo() {
     return Positioned(
       top: 1,
       right: 10,
@@ -222,7 +232,7 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  Container containerbeige(Size size) {
+  Container _containerbeige(Size size) {
     return Container(
       color: AppColors.color4,
       width: double.infinity,
@@ -230,5 +240,3 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 }
-
-

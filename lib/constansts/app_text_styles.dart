@@ -8,7 +8,7 @@ class AppTextStyles {
     double fontSize = 16,
     Color color = AppColors.color3, 
   }) {
-    if (![AppColors.color1, AppColors.color2, AppColors.color3].contains(color)) {
+    if (![AppColors.color1, AppColors.color2, AppColors.color3,AppColors.color4].contains(color)) {
       color = AppColors.color3; 
     }
     return TextStyle(
@@ -24,7 +24,7 @@ class AppTextStyles {
     double fontSize = 18,
     Color color = AppColors.color3, 
   }) {
-    if (![AppColors.color1, AppColors.color2, AppColors.color3].contains(color)) {
+    if (![AppColors.color1, AppColors.color2, AppColors.color3,AppColors.color4].contains(color)) {
       color = AppColors.color3;
     }
     return TextStyle(
@@ -39,7 +39,7 @@ class AppTextStyles {
     double fontSize = 20,
     Color color = AppColors.color3,
   }) {
-    if (![AppColors.color1, AppColors.color2, AppColors.color3].contains(color)) {
+    if (![AppColors.color1, AppColors.color2, AppColors.color3,AppColors.color4].contains(color)) {
       color = AppColors.color3;
     }
     return TextStyle(
@@ -55,7 +55,7 @@ class AppTextStyles {
     double fontSize = 24,
     Color color = AppColors.color3,
   }) {
-    if (![AppColors.color1, AppColors.color2, AppColors.color3].contains(color)) {
+    if (![AppColors.color1, AppColors.color2, AppColors.color3, AppColors.color4].contains(color)) {
       color = AppColors.color3;
     }
     return TextStyle(

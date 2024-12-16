@@ -1,0 +1,1 @@
+ C:\\Users\\Legion\\Documents\\FLUTTER_APPS\\FEPI\\fepi_local\\.dart_tool\\flutter_build\\3b81572c5f2fd3ccd7b048783948e92b\\native_assets.yaml: 
