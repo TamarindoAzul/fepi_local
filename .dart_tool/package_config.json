@@ -111,7 +111,7 @@
     },
     {
       "name": "file_picker",
-      "rootUri": "file:///C:/Users/Legion/AppData/Local/Pub/Cache/hosted/pub.dev/file_picker-8.1.4",
+      "rootUri": "file:///C:/Users/Legion/AppData/Local/Pub/Cache/hosted/pub.dev/file_picker-8.1.5",
       "packageUri": "lib/",
       "languageVersion": "3.4"
     },
@@ -578,7 +578,7 @@
       "languageVersion": "3.4"
     }
   ],
-  "generated": "2024-12-16T05:10:35.697897Z",
+  "generated": "2024-12-16T05:22:22.707711Z",
   "generator": "pub",
   "generatorVersion": "3.4.0",
   "flutterRoot": "file:///C:/flutter",
