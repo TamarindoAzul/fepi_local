@@ -1,4 +1,5 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<<<<<<< HEAD
 
     <!-- Permisos para leer y escribir en almacenamiento externo -->
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
@@ -6,6 +7,9 @@
     
     <application
         android:requestLegacyExternalStorage="true"
+=======
+    <application
+>>>>>>> f59828d96056b3c701320853e2d341b91ffe28dd
         android:label="fepi_local"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
