@@ -14,7 +14,7 @@ class ScreenPantallaPl004_01 extends StatelessWidget {
       appBar: AppBar(
         title: Column(
           children: const [
-            SizedBox(height: 60,),
+            
             Text('ECAR'),
           ],
         ),

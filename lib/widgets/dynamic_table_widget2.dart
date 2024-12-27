@@ -61,7 +61,7 @@ class _DynamicTableWidget2State extends State<DynamicTableWidget2> {
                             const SizedBox(width: 15),
                             Text(
                               item['NombreCompleto'] ?? '',
-                              style: AppTextStyles.secondBold(color: AppColors.color4, fontSize: 18),
+                              style: AppTextStyles.secondBold(color: AppColors.color2, fontSize: 18),
                             ),
                           ],
                         ),
@@ -81,43 +81,13 @@ class _DynamicTableWidget2State extends State<DynamicTableWidget2> {
                         children: [
                           Container(
                             color: AppColors.color3,
-                            child: TabBar(
-                              labelStyle: AppTextStyles.secondRegular(color: AppColors.color1, fontSize: 14),
-                              unselectedLabelStyle: AppTextStyles.secondRegular(color: AppColors.color2, fontSize: 14),
-                              indicatorColor: AppColors.color1,
-                              tabs: const [
-                                Tab(icon: Icon(Icons.info), text: "DATOS"),
-                                Tab(icon: Icon(Icons.edit), text: "PLANEACIONES"),
-                                Tab(icon: Icon(Icons.check_circle), text: "EVALUACIONES"),
-                              ],
-                            ),
+                            
                           ),
-                          Container(
-                            height: 450, // Altura del contenido
-                            padding: const EdgeInsets.all(16.0),
-                            child: TabBarView(
-                              children: [
-                                // Pestaña DATOS
-                                _buildDatosTab(item),
-
-                                // Pestaña PLANEACIONES
-                                Center(
-                                  child: Text(
-                                    'Planeaciones no disponibles',
-                                    style: AppTextStyles.secondMedium(color: AppColors.color2, fontSize: 16),
-                                  ),
-                                ),
-
-                                // Pestaña EVALUACIONES
-                                Center(
-                                  child: Text(
-                                    'Evaluaciones no disponibles',
-                                    style: AppTextStyles.secondMedium(color: AppColors.color2, fontSize: 16),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
+                           Container(
+                            child: Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: _buildDatosTab(item),
+                            )),
                         ],
                       ),
                     ),

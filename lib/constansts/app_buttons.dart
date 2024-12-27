@@ -27,11 +27,11 @@ class AppButtons {
       hintText: hintText,
       labelText: labelText,
       labelStyle: AppTextStyles.secondMedium(color: AppColors.color2),
-      hintStyle: AppTextStyles.secondRegular(color: AppColors.color4),
+      hintStyle: AppTextStyles.secondRegular(color: AppColors.color3),
       prefixIcon: prefixIcon,
       suffixIcon: suffixIcon,
       filled: true,
-      fillColor: AppColors.color3.withOpacity(0.1),
+      fillColor: const Color.fromARGB(255, 255, 255, 255).withOpacity(0.1),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(15),
         borderSide: BorderSide(color: AppColors.color3),

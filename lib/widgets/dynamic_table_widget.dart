@@ -56,7 +56,7 @@ class _DynamicTableWidgetState extends State<DynamicTableWidget> {
                             const SizedBox(width: 15),
                             Text(
                               item['NombreCompleto'] ?? '',
-                              style: AppTextStyles.secondBold(color: AppColors.color4, fontSize: 18),
+                              style: AppTextStyles.secondBold(color: AppColors.color2, fontSize: 18),
                               softWrap: true,
                               overflow: TextOverflow.visible,
                             ),
