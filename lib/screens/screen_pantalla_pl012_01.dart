@@ -1,12 +1,12 @@
 import 'package:fepi_local/constansts/app_colors.dart';
 import 'package:fepi_local/constansts/app_text_styles.dart';
-import 'package:fepi_local/prueba/alumnosAltabd.dart';
+import 'package:fepi_local/database/database_gestor.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_pdfview/flutter_pdfview.dart';
 import 'package:photo_view/photo_view_gallery.dart';
 
 class DynamicCardsWidget2 extends StatefulWidget {
-  static const String routeName = '/screen_pantalla_pl014_01';
+  static const String routeName = '/screen_pantalla_pl012_01';
 
   @override
   _DynamicCardsWidgetState createState() => _DynamicCardsWidgetState();
@@ -23,14 +23,14 @@ class _DynamicCardsWidgetState extends State<DynamicCardsWidget2> {
   }
 
   Future<void> _loadData() async {
-    final db = AlumnosDB();
-    final alumnos = await db.getAlumnos();
-    setState(() {
-      _data = alumnos;
-      
-      _isLoading = false;
-    });
-  }
+  final db = DatabaseHelper();
+  final alumnos = await db.cargarAlumnosDeResponsables(8);
+  setState(() {
+    // Filtrar solo los elementos con estado 'pendiente'
+    _data = alumnos.where((item) => item['state'] == 'pendiente').toList();
+    _isLoading = false;
+  });
+}
 
   @override
   Widget build(BuildContext context) {
@@ -119,13 +119,15 @@ class _DynamicCardsWidgetState extends State<DynamicCardsWidget2> {
             final parametro = 'nota';
             final valor = reasonController.text;
             // Llamar a la función para actualizar el parámetro específico final
-            final db = AlumnosDB();
+            final db = DatabaseHelper();
             await db.actualizarParametroAlumnoPorCURP(curp, parametro, valor);
             final parametro1 = 'state';
             final valor1 = 'no_aprobado';
             // Llamar a la función para actualizar el parámetro específico final
-            final db1 = AlumnosDB();
-            await db1.actualizarParametroAlumnoPorCURP(curp, parametro1, valor1);
+            await db.actualizarParametroAlumnoPorCURP(curp, parametro1, valor1);
+            setState(() {
+              _data.removeWhere((item) => item['curp'] == curp);
+            });
             Navigator.pop(context);
             },
             // Mostrar un mensaje de éxito ScaffoldMessenger.of(context).showSnackBar( SnackBar(content: Text('Datos actualizados correctamente')), ); },
@@ -152,15 +154,20 @@ class _DynamicCardsWidgetState extends State<DynamicCardsWidget2> {
               // Lógica futura para aceptar la solicitud
               Navigator.pop(context);
             },
-            child: const Text('Aceptar'),
+            child: const Text('Cancelar'),
           ),
           TextButton(
             onPressed: () async {final parametro1 = 'state';
             final valor1 = 'aprobado';
             // Llamar a la función para actualizar el parámetro específico final
-            final db2 = AlumnosDB();
-            await db2.actualizarParametroAlumnoPorCURP(curp, parametro1, valor1);},
-            child: const Text('Cancelar'),
+            final db2 = DatabaseHelper();
+            await db2.actualizarParametroAlumnoPorCURP(curp, parametro1, valor1);
+            setState(() {
+              _data.removeWhere((item) => item['curp'] == curp);
+            });
+            Navigator.pop(context);
+            },
+            child: const Text('Aceptar'),
           ),
         ],
       ),

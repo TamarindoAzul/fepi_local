@@ -1,4 +1,4 @@
-import 'package:fepi_local/prueba/ECAdb.dart';
+import 'package:fepi_local/database/database_gestor.dart';
 import 'package:flutter/material.dart';
 import 'package:fepi_local/constansts/app_colors.dart';
 import 'package:fepi_local/constansts/app_text_styles.dart';
@@ -16,9 +16,9 @@ class ScreenPantallaPl003_01 extends StatefulWidget {
 }
 
 class _ScreenPantallaPl003_01State extends State<ScreenPantallaPl003_01> {
-  String microrregion="Tepito";
   List<Map<String, String>> _data = [];
   bool _isLoading = true;
+  Map<String, String> result = {};  // Cambiar 'result' para que sea un mapa
 
   @override
   void initState() {
@@ -27,11 +27,14 @@ class _ScreenPantallaPl003_01State extends State<ScreenPantallaPl003_01> {
   }
 
   Future<void> _loadData() async {
-    final db = PersonalECDB();
-    db.inyectarDatosDePrueba();
-    final personal = await db.getPersonal();
+    final dbHelper = DatabaseHelper();
+    await dbHelper.database;
+    var resultFromDb = await dbHelper.getUbicacionPorUsuario(1);
+    var personal = await dbHelper.getResponsablesPorUsuario(4);
+    
     setState(() {
-      // Convertir cada mapa a Map<String, String>
+      // Almacenar el resultado como un mapa
+      result = resultFromDb!;  // Asignar directamente el mapa
       _data = personal.map((item) {
         return item.map((key, value) => MapEntry(key, value.toString()));
       }).toList();
@@ -41,22 +44,26 @@ class _ScreenPantallaPl003_01State extends State<ScreenPantallaPl003_01> {
 
   @override
   Widget build(BuildContext context) {
+    // Si result es un mapa, puedes extraer un valor específico de él
+    String extractedValue = result.isNotEmpty ? result['nombre'] ?? 'Valor no encontrado' : 'Cargando...';
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Microrregión'),
+        title: const Text('Región para ECAR'),
         titleTextStyle: AppTextStyles.primaryRegular(color: AppColors.color1),
         backgroundColor: AppColors.color3,
         centerTitle: true,
       ),
       body: Stack(
         children: [
-          SizedBox(child: CardInfo(text: '${microrregion}')),
+          // Pasar el valor extraído del mapa al widget CardInfo
+          SizedBox(child: CardInfo(text: extractedValue)),
           Padding(
             padding: const EdgeInsets.only(top: 80),
             child: _isLoading
                 ? const Center(child: CircularProgressIndicator())
                 : SearchFilterWidget(
-                    data: _data, 
+                    data: _data,
                   ),
           ),
         ],

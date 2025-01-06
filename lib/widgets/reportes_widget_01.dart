@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:fepi_local/database/database_gestor.dart';  // Asegúrate de importar la función
 
 class ActividadesPage extends StatefulWidget {
   @override
@@ -6,12 +8,7 @@ class ActividadesPage extends StatefulWidget {
 }
 
 class _ActividadesPageState extends State<ActividadesPage> {
-  // Map inicial con las actividades
-  final List<Map<String, String>> actividades = [
-    {"Actividad": "Revisar informe", "FE": "A1", "Fecha": "2024-12-16", "Estado": "activo"},
-    {"Actividad": "Llamada con cliente", "FE": "A2", "Fecha": "2024-12-15", "Estado": "terminado"},
-    {"Actividad": "Actualizar sistema", "FE": "A3", "Fecha": "2024-12-14", "Estado": "activo"},
-  ];
+  int? idUsuario;  // Almacenar el idUsuario
 
   // Map para almacenar los reportes
   final List<Map<String, String>> reportes = [];
@@ -41,7 +38,7 @@ class _ActividadesPageState extends State<ActividadesPage> {
               child: Text("Cancelar"),
             ),
             ElevatedButton(
-              onPressed: () {
+              onPressed: () async {
                 if (reporteController.text.isNotEmpty) {
                   // Agregar el reporte al mapa
                   setState(() {
@@ -49,13 +46,22 @@ class _ActividadesPageState extends State<ActividadesPage> {
                       "ID": DateTime.now().millisecondsSinceEpoch.toString(),
                       "Reporte": reporteController.text,
                       "Actividad": actividad["Actividad"]!,
-                      "FE": actividad["FE"]!,
+                      "FE": actividad["id_ActividadAcomp"]!,  // Ahora directamente se usa "id_ActividadAcomp"
                       "Fecha": actividad["Fecha"]!,
                     });
 
-                    // Cambiar el estado de la actividad a terminado
+                    // Cambiar el estado de la actividad a "terminado"
                     actividad["Estado"] = "terminado";
                   });
+                  final db= await DatabaseHelper();
+                  // Llamamos a la función para actualizar el estado y registrar el reporte
+                  await db.cambiarEstadoYRegistrarReporte(
+                    int.parse(actividad["id_ActividadAcomp"]!),  // id_ActividadAcomp directamente desde el mapa
+                    idUsuario!,  // idUsuario
+                    reporteController.text,  // Contenido del reporte
+                    "Figura Educativa",  // Esto puede ser personalizado según sea necesario
+                  );
+
                   Navigator.pop(context); // Cerrar pop-up
                 }
               },
@@ -67,29 +73,70 @@ class _ActividadesPageState extends State<ActividadesPage> {
     );
   }
 
+  // Llamar a la función obtenerActividadesPorUsuario
+  Future<Map<String, List<Map<String, dynamic>>>> _obtenerActividades() async {
+    final db = await DatabaseHelper();
+
+    // Obtener el idUsuario desde SharedPreferences
+    final prefs = await SharedPreferences.getInstance();
+    idUsuario = prefs.getInt('idUsuario');
+    idUsuario = 1;
+
+    if (idUsuario == null) {
+      throw Exception("No se encontró el idUsuario en SharedPreferences");
+    }
+
+    return await db.obtenerActividadesPorUsuario(idUsuario!);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text('Gestión de Actividades'),
       ),
-      body: ListView(
-        children: actividades
-            .where((actividad) => actividad["Estado"] == "activo")
-            .map((actividad) {
-          return Card(
-            margin: EdgeInsets.all(10),
-            elevation: 5,
-            child: ListTile(
-              title: Text(actividad["Actividad"]!),
-              subtitle: Text("FE: ${actividad["FE"]} | Fecha: ${actividad["Fecha"]}"),
-              trailing: ElevatedButton(
-                onPressed: () => _showReporteDialog(actividad),
-                child: Text("Reportar"),
-              ),
-            ),
+      body: FutureBuilder<Map<String, List<Map<String, dynamic>>>>(
+        future: _obtenerActividades(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return Center(child: CircularProgressIndicator()); // Muestra un cargando mientras obtiene los datos
+          }
+
+          if (snapshot.hasError) {
+            return Center(child: Text('Error: ${snapshot.error}'));
+          }
+
+          if (!snapshot.hasData || snapshot.data!.isEmpty) {
+            return Center(child: Text('No hay actividades disponibles.'));
+          }
+
+          // Mapeo de actividades a un formato de lista
+          var actividades = snapshot.data!.values.expand((e) => e).toList();
+          print(actividades); // Imprime la lista de actividades
+          return ListView(
+            children: actividades
+                .where((actividad) => actividad['estado'] == 'activo')
+                .map((actividad) {
+              return Card(
+                margin: EdgeInsets.all(10),
+                elevation: 5,
+                child: ListTile(
+                  title: Text(actividad["nombreEC"]!),
+                  subtitle: Text("Fecha: ${actividad["fecha"]} | Hora: ${actividad["hora"]}"),
+                  trailing: ElevatedButton(
+                    onPressed: () => _showReporteDialog({
+                      "Actividad": actividad["nombreEC"]!,
+                      "id_ActividadAcomp": actividad["id_ActividadAcomp"].toString(),  // Pasar directamente el id_ActividadAcomp
+                      "Fecha": actividad["fecha"]!,
+                      "Estado": actividad["estado"]!,
+                    }),
+                    child: Text("Reportar"),
+                  ),
+                ),
+              );
+            }).toList(),
           );
-        }).toList(),
+        },
       ),
     );
   }

@@ -1,7 +1,6 @@
+import 'package:fepi_local/database/database_gestor.dart';
 import 'package:flutter/material.dart';
-import 'package:fepi_local/constansts/app_buttons.dart';
-import 'package:fepi_local/constansts/app_colors.dart';
-import 'package:fepi_local/constansts/app_text_styles.dart';
+import 'package:table_calendar/table_calendar.dart';
 
 class AgendaWidget extends StatefulWidget {
   const AgendaWidget({Key? key}) : super(key: key);
@@ -11,304 +10,273 @@ class AgendaWidget extends StatefulWidget {
 }
 
 class _AgendaWidgetState extends State<AgendaWidget> {
-  DateTime _selectedDate = DateTime.now(); // Fecha seleccionada por el usuario
-  final Map<String, Map<String, String>> agendaData = {}; // Almacena datos de cada celda
-  final List<String> days = [
-    'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes'
-  ];
-  final List<String> hours = [
-    '08:00 - 09:00', '09:00 - 10:00', '10:00 - 11:00', '11:00 - 12:00',
-    '12:00 - 13:00', '13:00 - 14:00', '14:00 - 15:00', '15:00 - 16:00',
-    '16:00 - 17:00', '17:00 - 18:00', '18:00 - 19:00', '19:00 - 20:00',
-    '20:00 - 21:00', '21:00 - 22:00', '22:00 - 23:00', '24:00 - 00:00'
-  ];
-
-  String get semana => "Semana: ${_getWeekOfMonth(_selectedDate)}";
-  String get mes => "Mes: ${_selectedDate.month}";
-  String get anio => "Año: ${_selectedDate.year}";
-
-  int _getWeekOfMonth(DateTime date) {
-    final startOfMonth = DateTime(date.year, date.month, 1);
-    final difference = date.difference(startOfMonth).inDays;
-    return ((difference / 7).floor()) + 1;
-  }
-
-  void _seleccionarFecha() async {
-    final DateTime? picked = await showDatePicker(
-      context: context,
-      initialDate: _selectedDate,
-      firstDate: DateTime(2024),
-      lastDate: DateTime(2030),
-    );
-    if (picked != null && picked != _selectedDate) {
-      setState(() {
-        _selectedDate = picked; // Actualizar la fecha seleccionada
-      });
-    }
-  }
-
-  // Define ScrollControllers for both scroll views
-  final ScrollController verticalController = ScrollController();
-  final ScrollController horizontalController = ScrollController();
+  late Future<Map<String, List<Map<String, dynamic>>>> _eventos;
 
   @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        // Información de la semana, mes y año
-        Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Card(
-            elevation: 4,
-            margin: const EdgeInsets.symmetric(vertical: 8),
-            child: Column(
-              children: [
-                ElevatedButton(
-                  style: AppButtons.btnFORM(),
-                  onPressed: _seleccionarFecha,
-                  child: Text(
-                    'Seleccionar Fecha',
-                    style: AppTextStyles.secondMedium(color: AppColors.color1),
-                  ),
-                ),
-                Text(
-                  "$semana | $mes | $anio",
-                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                ),
-              ],
-            ),
-          ),
-        ),
-        Expanded(
-          child: Scrollbar(
-            thumbVisibility: true,
-            controller: verticalController,  // Attach the vertical scroll controller
-            child: SingleChildScrollView(
-              controller: verticalController,  // Same controller for vertical scroll
-              scrollDirection: Axis.vertical,
-              child: SingleChildScrollView(
-                controller: horizontalController,  // Different controller for horizontal scroll
-                scrollDirection: Axis.horizontal,
-                child: DataTable(
-                  headingRowColor: MaterialStateProperty.all(Colors.grey[200]),
-                  border: TableBorder.all(color: Colors.grey, width: 0.5),
-                  columns: [
-                    for (var day in days)
-                      DataColumn(
-                        label: Text(
-                          day,
-                          style: const TextStyle(fontWeight: FontWeight.bold),
-                        ),
-                      ),
-                  ],
-                  rows: [
-                    for (var hour in hours)
-                      DataRow(
-                        cells: [
-                          for (var day in days)
-                            _buildCell(
-                              GestureDetector(
-                                onTap: () => _showPopup(context, day, hour),
-                                child: Container(
-                                  width: 100,
-                                  constraints: BoxConstraints(minWidth: 100),
-                                  decoration: BoxDecoration(
-                                    color: agendaData.containsKey('$day|$hour')
-                                        ? Colors.lightBlue[100]
-                                        : Colors.grey.withOpacity(0.2),
-                                    borderRadius: BorderRadius.zero,
-                                  ),
-                                  alignment: Alignment.center,
-                                  padding: EdgeInsets.all(4.0),
-                                  child: Text(
-                                    agendaData['$day|$hour']?['NombreEC'] ?? hour,
-                                    style: const TextStyle(fontSize: 12),
-                                    textAlign: TextAlign.center,
-                                  ),
-                                ),
-                              ),
-                            ),
-                        ],
-                      ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
+  void initState() {
+    super.initState();
+    _eventos = _cargarEventos(); // Aquí se llama a la función que retorna un Future
   }
 
-  DataCell _buildCell(Widget child) {
-    return DataCell(
-      Container(
-        padding: EdgeInsets.zero,
-        alignment: Alignment.center,
-        constraints: BoxConstraints.expand(),
-        child: child,
+  Future<Map<String, List<Map<String, dynamic>>>> _cargarEventos() async {
+    final db = DatabaseHelper();
+    final eventos = await db.obtenerActividadesPorUsuario(1);
+    print (eventos);
+    return eventos;
+  }
+
+  Future<void> _crearActividad() async {
+    final TextEditingController fechaController = TextEditingController();
+    final TextEditingController horaController = TextEditingController();
+    final TextEditingController nombreController = TextEditingController();
+    final TextEditingController descripcionController = TextEditingController();
+    final TextEditingController estadoController = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Agregar Actividad'),
+        content: SingleChildScrollView(
+          child: Column(
+            children: [
+              TextField(
+                controller: fechaController,
+                decoration: const InputDecoration(labelText: 'Fecha (YYYY-MM-DD)'),
+              ),
+              TextField(
+                controller: horaController,
+                decoration: const InputDecoration(labelText: 'Hora (HH:MM)'),
+              ),
+              TextField(
+                controller: nombreController,
+                decoration: const InputDecoration(labelText: 'Nombre'),
+              ),
+              TextField(
+                controller: descripcionController,
+                decoration: const InputDecoration(labelText: 'Descripción'),
+              ),
+              TextField(
+                controller: estadoController,
+                decoration: const InputDecoration(labelText: 'Estado'),
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+            child: const Text('Cancelar'),
+          ),
+          TextButton(
+            onPressed: () async {
+              final nuevaActividad = {
+                'id_Usuario': 1, // Asegúrate de incluir el ID de usuario aquí
+                'fecha': fechaController.text.trim(),
+                'hora': horaController.text.trim(),
+                'nombreEC': nombreController.text.trim(),
+                'descripcion': descripcionController.text.trim(),
+                'estado': estadoController.text.trim(),
+              };
+              final bd= await DatabaseHelper(); 
+              // Insertar la nueva actividad en la base de datos
+              await bd.insertarActividad(nuevaActividad);
+
+              // Actualizar la UI
+              final eventos = await _eventos;
+              setState(() {
+                final fecha = nuevaActividad['fecha'] as String;
+                if (eventos[fecha] == null) {
+                  eventos[fecha!] = [];
+                }
+                eventos[fecha]!.add(nuevaActividad);
+                print("Actividad agregada. Eventos actuales: $eventos");
+              });
+
+              Navigator.of(context).pop();
+            },
+            child: const Text('Guardar'),
+          ),
+        ],
       ),
     );
   }
 
-  void _showPopup(BuildContext context, String day, String hour) {
-    final cellKey = '$day|$hour';
-    final isFilled = agendaData.containsKey(cellKey);
+  void _editarActividad(Map<String, dynamic> actividad) {
+  final TextEditingController fechaController = TextEditingController(text: actividad['fecha']);
+  final TextEditingController horaController = TextEditingController(text: actividad['hora']);
+  final TextEditingController nombreController = TextEditingController(text: actividad['nombreEC']);
+  final TextEditingController descripcionController = TextEditingController(text: actividad['descripcion']);
+  final TextEditingController estadoController = TextEditingController(text: actividad['estado']);
 
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        if (isFilled) {
-          final data = agendaData[cellKey]!;
-
-          return AlertDialog(
-            title: const Text('Detalles de Actividad'),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('Horario: ${data['Horario']}'),
-                const SizedBox(height: 8),
-                Text('Nombre EC: ${data['NombreEC']}'),
-                const SizedBox(height: 8),
-                Text('Descripción: ${data['Descripcion']}'),
-              ],
+  showDialog(
+    context: context,
+    builder: (context) => AlertDialog(
+      title: const Text('Editar Actividad'),
+      content: SingleChildScrollView(
+        child: Column(
+          children: [
+            TextField(
+              controller: fechaController,
+              decoration: const InputDecoration(labelText: 'Fecha (YYYY-MM-DD)'),
             ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(),
-                child: const Text('Cerrar'),
-              ),
-              TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                  _editCell(context, day, hour);
-                },
-                child: const Text('Editar'),
-              ),
-            ],
-          );
-        } else {
-          final _descripcionController = TextEditingController();
-          String? selectedEC;
-          final List<String> nombreECOptions = ['EC1', 'EC2', 'EC3'];
-
-          return AlertDialog(
-            title: const Text('Nueva Actividad'),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('Horario: $hour'),
-                const SizedBox(height: 8),
-                DropdownButtonFormField<String>(
-                  value: selectedEC,
-                  items: nombreECOptions
-                      .map((ec) => DropdownMenuItem<String>(
-                            value: ec,
-                            child: Text(ec),
-                          ))
-                      .toList(),
-                  onChanged: (value) => selectedEC = value,
-                  decoration: const InputDecoration(labelText: 'Selecciona EC'),
-                ),
-                const SizedBox(height: 8),
-                TextField(
-                  controller: _descripcionController,
-                  decoration: const InputDecoration(
-                      labelText: 'Descripción de la Actividad'),
-                  maxLines: 3,
-                ),
-              ],
+            TextField(
+              controller: horaController,
+              decoration: const InputDecoration(labelText: 'Hora (HH:MM)'),
             ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(),
-                child: const Text('Cancelar'),
-              ),
-              TextButton(
-                onPressed: () {
-                  if (selectedEC != null) {
-                    setState(() {
-                      agendaData[cellKey] = {
-                        'Horario': hour,
-                        'NombreEC': selectedEC!,
-                        'Descripcion': _descripcionController.text,
-                      };
-                    });
-                  }
-                  Navigator.of(context).pop();
-                },
-                child: const Text('Guardar'),
-              ),
-            ],
-          );
-        }
-      },
-    );
-  }
-
-  void _editCell(BuildContext context, String day, String hour) {
-    final cellKey = '$day|$hour';
-    final data = agendaData[cellKey]!;
-
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        final _descripcionController =
-            TextEditingController(text: data['Descripcion']);
-        String selectedEC = data['NombreEC']!;
-        final List<String> nombreECOptions = ['EC1', 'EC2', 'EC3'];
-
-        return AlertDialog(
-          title: const Text('Editar Actividad'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text('Horario: $hour'),
-              const SizedBox(height: 8),
-              DropdownButtonFormField<String>(
-                value: selectedEC,
-                items: nombreECOptions
-                    .map((ec) => DropdownMenuItem<String>(
-                          value: ec,
-                          child: Text(ec),
-                        ))
-                    .toList(),
-                onChanged: (value) => selectedEC = value!,
-                decoration: const InputDecoration(labelText: 'Selecciona EC'),
-              ),
-              const SizedBox(height: 8),
-              TextField(
-                controller: _descripcionController,
-                decoration: const InputDecoration(
-                    labelText: 'Descripción de la Actividad'),
-                maxLines: 3,
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text('Cancelar'),
+            TextField(
+              controller: nombreController,
+              decoration: const InputDecoration(labelText: 'Nombre'),
             ),
-            TextButton(
-              onPressed: () {
-                setState(() {
-                  agendaData[cellKey] = {
-                    'Horario': hour,
-                    'NombreEC': selectedEC,
-                    'Descripcion': _descripcionController.text,
-                  };
-                });
-                Navigator.of(context).pop();
-              },
-              child: const Text('Guardar'),
+            TextField(
+              controller: descripcionController,
+              decoration: const InputDecoration(labelText: 'Descripción'),
+            ),
+            TextField(
+              controller: estadoController,
+              decoration: const InputDecoration(labelText: 'Estado'),
             ),
           ],
-        );
-      },
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+          child: const Text('Cancelar'),
+        ),
+        TextButton(
+          onPressed: () async {
+            final actividadEditada = {
+              'id_ActividadAcomp': actividad['id_ActividadAcomp'],
+              'fecha': fechaController.text.trim(),
+              'hora': horaController.text.trim(),
+              'nombreEC': nombreController.text.trim(),
+              'descripcion': descripcionController.text.trim(),
+              'estado': estadoController.text.trim(),
+            };
+
+            // Llamar a la función para editar la actividad en la base de datos
+            final db = DatabaseHelper();
+            await db.editarActividadAcomp(actividadEditada);
+
+            // Actualizar la UI después de editar la actividad
+            final eventos = await _eventos;
+
+            setState(() {
+              final fecha = actividadEditada['fecha'];
+              final index = eventos[fecha]?.indexWhere((act) => act['id_ActividadAcomp'] == actividad['id_ActividadAcomp']);
+              if (index != null && index != -1) {
+                eventos[fecha]![index] = actividadEditada;
+              }
+            });
+
+            Navigator.of(context).pop();
+          },
+          child: const Text('Guardar'),
+        ),
+      ],
+    ),
+  );
+}
+
+  void _eliminarActividad(Map<String, dynamic> actividad) async {
+  final fecha = actividad['fecha'];
+  final idActividad = actividad['id_ActividadAcomp'];
+  print(idActividad); // Suponiendo que este es el identificador único
+
+  // Llamar a la función de eliminación de la base de datos
+  final db = DatabaseHelper();
+  await db.eliminarActividad(idActividad);
+
+  // Actualizar la UI después de eliminar la actividad de la base de datos
+  final eventos = await _eventos;
+
+  setState(() {
+    eventos[fecha]?.removeWhere((act) => act['id_ActividadAcomp'] == idActividad);
+    if (eventos[fecha]?.isEmpty ?? true) {
+      eventos.remove(fecha);
+    }
+  });
+
+  print("Actividad eliminada. Eventos actuales: $eventos");
+}
+
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Agenda de Actividades'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.add),
+            onPressed: _crearActividad, // Llamada a la función para agregar actividad
+          ),
+        ],
+      ),
+      body: FutureBuilder<Map<String, List<Map<String, dynamic>>>>(
+        future: _eventos, // Este espera que _eventos sea un Future
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          if (snapshot.hasError) {
+            return Center(child: Text('Error: ${snapshot.error}'));
+          }
+          final eventos = snapshot.data ?? {}; // Aquí es donde puedes acceder a los eventos cargados
+          return Column(
+            children: [
+              TableCalendar(
+                firstDay: DateTime.utc(2020, 1, 1),
+                lastDay: DateTime.utc(2025, 12, 31),
+                focusedDay: DateTime.now(),
+                eventLoader: (day) {
+                  final fecha = '${day.year}-${day.month.toString().padLeft(2, '0')}-${day.day.toString().padLeft(2, '0')}';
+                  return eventos[fecha] ?? [];
+                },
+                onDaySelected: (selectedDay, focusedDay) async {
+                  final fecha = '${selectedDay.year}-${selectedDay.month.toString().padLeft(2, '0')}-${selectedDay.day.toString().padLeft(2, '0')}';
+                  showDialog(
+                    context: context,
+                    builder: (context) => AlertDialog(
+                      title: Text('Actividades para $fecha'),
+                      content: SingleChildScrollView(
+                        child: Column(
+                          children: [
+                            for (var actividad in eventos[fecha] ?? [])
+                              ListTile(
+                                title: Text(actividad['nombreEC']),
+                                subtitle: Text('${actividad['hora']} - ${actividad['descripcion']}'),
+                                onTap: () {
+                                  _editarActividad(actividad);
+                                },
+                                trailing: IconButton(
+                                  icon: const Icon(Icons.delete),
+                                  onPressed: () {
+                                    _eliminarActividad(actividad);
+                                  },
+                                ),
+                              ),
+                          ],
+                        ),
+                      ),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.of(context).pop(),
+                          child: const Text('Cerrar'),
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              ),
+            ],
+          );
+        },
+      ),
     );
   }
 }

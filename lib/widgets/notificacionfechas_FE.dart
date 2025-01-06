@@ -1,24 +1,39 @@
 import 'package:fepi_local/constansts/app_colors.dart';
 import 'package:fepi_local/constansts/app_text_styles.dart';
+import 'package:fepi_local/database/database_gestor.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart'; // Para manejar y formatear fechas
 
-class ActividadesTable extends StatelessWidget {
-  // Este es el mapa de actividades
-  final Map<String, Map<String, String>> actividades = {
-    'Actividad 1': {'Descripcion': 'Descripcion de la actividad 1', 'Fecha': '2024-12-20', 'Estado': 'activo'},
-    'Actividad 2': {'Descripcion': 'Descripcion de la actividad 2', 'Fecha': '2024-12-15', 'Estado': 'inactivo'},
-    'Actividad 3': {'Descripcion': 'Descripcion de la actividad 3', 'Fecha': '2024-12-15', 'Estado': 'activo'},
-    'Actividad 4': {'Descripcion': 'Descripcion de la actividad 4', 'Fecha': '2020-01-05', 'Estado': 'activo'},
-    'Actividad 5': {'Descripcion': 'Descripcion de la actividad 3', 'Fecha': '2025-02-04', 'Estado': 'activo'},
-    'Actividad 6': {'Descripcion': '', 'Fecha': '2025-02-05', 'Estado': 'activo'},
-  };
+class ActividadesTable extends StatefulWidget {
+  @override
+  _ActividadesTableState createState() => _ActividadesTableState();
+}
+
+class _ActividadesTableState extends State<ActividadesTable> {
+  // Mapa de actividades vacío, se llenará con la función de carga
+  Map<String, Map<String, String>> actividades = {};
+
+  // Llamar la función que obtiene las actividades por nombreEC (por ejemplo, 'nombreEC')
+  @override
+  void initState() {
+    super.initState();
+    _cargarActividades();
+  }
+
+  // Función para cargar las actividades desde la base de datos
+  Future<void> _cargarActividades() async {
+    final db= await DatabaseHelper();
+    Map<String, Map<String, String>> actividadesCargadas = await db.obtenerActividadesPorNombreEC('Educador Comunitario 12'); // Cambiar el valor según lo que necesites
+    setState(() {
+      actividades = actividadesCargadas;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     // Convertir el mapa en una lista de mapas para poder ordenarlo por fecha
     List<MapEntry<String, Map<String, String>>> listaActividades = actividades.entries.toList();
-    
+
     // Ordenar la lista de actividades por la fecha más próxima
     listaActividades.sort((a, b) {
       DateTime fechaA = DateFormat('yyyy-MM-dd').parse(a.value['Fecha']!);
@@ -41,10 +56,9 @@ class ActividadesTable extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    
                     Text(
                       actividad.key,
-                      style: AppTextStyles.secondBold(color: AppColors.color2)
+                      style: AppTextStyles.secondBold(color: AppColors.color2),
                     ),
                     SizedBox(height: 8.0),
                     Text(
@@ -67,8 +81,5 @@ class ActividadesTable extends StatelessWidget {
   }
 }
 
-void main() {
-  runApp(MaterialApp(
-    home: ActividadesTable(),
-  ));
-}
+
+

@@ -1,7 +1,10 @@
 import 'package:fepi_local/constansts/app_colors.dart';
 import 'package:fepi_local/constansts/app_text_styles.dart';
+import 'package:fepi_local/database/database_gestor.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
 
 class LoginScreen extends StatefulWidget {
   static const String routeName = '/login';
@@ -18,14 +21,6 @@ class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
   bool isLoading = false;
 
-  // Mapa de usuarios con roles
-  final Map<String, Map<String, String>> users = {
-    'Angel': {'rol': 'EC', 'pass': '123456'},
-    'Brenda': {'rol': 'ECAR', 'pass': '456123'},
-    'Carlos': {'rol': 'ECA', 'pass': '789123'},
-    'Diana': {'rol': 'APEC', 'pass': '101123'},
-  };
-
   @override
   void dispose() {
     usernameController.dispose();
@@ -34,7 +29,7 @@ class _LoginScreenState extends State<LoginScreen> {
     super.dispose();
   }
 
-  void _login() {
+  void _login() async {
     if (_formKey.currentState!.validate()) {
       setState(() {
         isLoading = true;
@@ -43,23 +38,37 @@ class _LoginScreenState extends State<LoginScreen> {
       String username = usernameController.text.trim();
       String password = passwordController.text.trim();
 
-      if (users.containsKey(username) && users[username]!['pass'] == password) {
-        String userRole = users[username]!['rol']!;
+      // Llamar a la función verificarLogin desde UsuariosDB
+     final dbHelper = DatabaseHelper();
+     await dbHelper.database;
+      // Esto crea la base de datos si no existe
+     var result = await dbHelper.validarUsuario(username, password);
+
+      if (result != null) {
+        // Si la verificación es exitosa, guardar id_Usuario y rol en SharedPreferences
+        int idUsuario = result['id_Usuario'];
+        String rol = result['rol'];
+
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+        await prefs.setInt('id_Usuario', idUsuario); // Guardar id_Usuario
+        await prefs.setString('rol', rol); // Guardar rol
+
         setState(() {
           isLoading = false;
         });
+
         // Redirigir según el rol del usuario
-        if (userRole == 'EC') {
+        if (rol == 'EC') {
           context.go('/screen__pantalla_pl013_01');
-        } else if (userRole == 'ECAR') {
+        } else if (rol == 'ECAR') {
           context.go('/ecar_home');
-        } else if (userRole == 'ECA') {
+        } else if (rol == 'ECA') {
           context.go('/eca_home');
-        } else if (userRole == 'APEC') {
+        } else if (rol == 'APEC') {
           context.go('/apec_home');
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Rol de usuario desconocido', style: AppTextStyles.secondMedium(),)),
+            SnackBar(content: Text('Rol de usuario desconocido', style: AppTextStyles.secondMedium())),
           );
         }
       } else {
@@ -67,7 +76,7 @@ class _LoginScreenState extends State<LoginScreen> {
           isLoading = false;
         });
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Usuario o contraseña incorrectos',style: AppTextStyles.secondMedium())),
+          SnackBar(content: Text('Usuario o contraseña incorrectos', style: AppTextStyles.secondMedium())),
         );
       }
     }
@@ -142,7 +151,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         },
                       ),
                       const SizedBox(height: 30),
-                      ValueListenableBuilder<bool>(
+                      ValueListenableBuilder<bool>( 
                         valueListenable: isVisibleNotifier,
                         builder: (context, isVisible, child) {
                           return TextFormField(

@@ -57,7 +57,7 @@ class _SearchFilterWidgetState extends State<SearchFilterWidget2> {
           child: ListView.builder(
             itemCount: widget.data
                 .where((item) =>
-                    item['NombreCompleto']!.contains(query) &&
+                    item['Nombre']!.contains(query) &&
                     (filterStatus == 'Todos' ||
                         item['Estatus'] == filterStatus))
                 .toList()
@@ -65,7 +65,7 @@ class _SearchFilterWidgetState extends State<SearchFilterWidget2> {
             itemBuilder: (context, index) {
               final filteredData = widget.data
                   .where((item) =>
-                      item['NombreCompleto']!.contains(query) &&
+                      item['Nombre']!.contains(query) &&
                       (filterStatus == 'Todos' ||
                           item['Estatus'] == filterStatus))
                   .toList();

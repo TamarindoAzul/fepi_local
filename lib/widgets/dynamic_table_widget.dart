@@ -55,7 +55,7 @@ class _DynamicTableWidgetState extends State<DynamicTableWidget> {
                             ),
                             const SizedBox(width: 15),
                             Text(
-                              item['NombreCompleto'] ?? '',
+                              item['Nombre'] ?? '',
                               style: AppTextStyles.secondBold(color: AppColors.color2, fontSize: 18),
                               softWrap: true,
                               overflow: TextOverflow.visible,
@@ -80,7 +80,7 @@ class _DynamicTableWidgetState extends State<DynamicTableWidget> {
                           _buildInfoCard('Rol', item['Rol'] ?? '', Icons.person),
                           _buildInfoCard('Ubicación', item['Ubicacion'] ?? '', Icons.map),
                           _buildInfoCard('Situación Educativa', item['Situacion'] ?? '', Icons.school),
-                          _buildInfoCard('Tipo de Servicio', item['TipoServicio'] ?? '', Icons.work),
+                          _buildInfoCard('Tipo de Servicio', item['tipoServicio'] ?? '', Icons.work),
                           _buildInfoCard('Contexto', item['Contexto'] ?? '', Icons.agriculture_sharp),
                           const SizedBox(height: 15),
                           const Divider(color: Colors.grey),

@@ -60,7 +60,7 @@ class _DynamicTableWidget2State extends State<DynamicTableWidget2> {
                             ),
                             const SizedBox(width: 15),
                             Text(
-                              item['NombreCompleto'] ?? '',
+                              item['Nombre'] ?? '',
                               style: AppTextStyles.secondBold(color: AppColors.color2, fontSize: 18),
                             ),
                           ],
@@ -109,7 +109,7 @@ class _DynamicTableWidget2State extends State<DynamicTableWidget2> {
           _buildInfoCard('Rol', item['Rol'] ?? '', Icons.person),
           _buildInfoCard('Ubicación', item['Ubicacion'] ?? '', Icons.map),
           _buildInfoCard('Situación Educativa', item['Situacion'] ?? '', Icons.school),
-          _buildInfoCard('Tipo de Servicio', item['TipoServicio'] ?? '', Icons.work),
+          _buildInfoCard('Tipo de Servicio', item['tipoServicio'] ?? '', Icons.work),
           _buildInfoCard('Contexto', item['Contexto'] ?? '', Icons.agriculture_sharp),
         ],
       ),

@@ -121,7 +121,8 @@ Future<void> insertarAlumnoConArchivos(Map<String, dynamic> alumno) async {
     'telefonoPadre': alumno['telefonoPadre'] ?? '',
     'fotoVacunacion': fotoVacunacionBytes,
     'state': alumno['state'],
-    'nota': alumno['nota']
+    'nota': alumno['nota'],
+    'id_Maestro': alumno['id_Maestro']
   });
 }
 

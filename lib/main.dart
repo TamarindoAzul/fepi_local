@@ -1,9 +1,13 @@
 
+import 'package:fepi_local/database/database_gestor.dart';
 import 'package:fepi_local/routes/go_rute.dart';
 import 'package:flutter/material.dart';
 
 
 void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  final dbHelper = DatabaseHelper();
+     await dbHelper.database;
   runApp(MainApp()); 
 }
 

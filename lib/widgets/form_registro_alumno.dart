@@ -1,4 +1,4 @@
-import 'package:fepi_local/prueba/alumnosAltabd.dart';
+import 'package:fepi_local/database/database_gestor.dart';
 import 'package:fepi_local/widgets/fecha.dart';
 import 'package:flutter/material.dart';
 import 'dart:io';
@@ -13,6 +13,7 @@ class FormRegistroAlumno extends StatefulWidget {
 }
 
 class _FormRegistroAlumnoState extends State<FormRegistroAlumno> {
+  final int idmaestro = 1;
   // Controladores de texto
   TextEditingController fechaNacimientoController = TextEditingController();
   TextEditingController lugarNacimientoController = TextEditingController();
@@ -36,28 +37,27 @@ class _FormRegistroAlumnoState extends State<FormRegistroAlumno> {
   String? nivelEducativo;
   String? gradoEscolar;
 
- Future<void> _pickActaNacimiento() async {
-  FilePickerResult? result = await FilePicker.platform.pickFiles(
-    type: FileType.custom,
-    allowedExtensions: ['pdf', 'jpg', 'jpeg', 'png'],
-  );
+  Future<void> _pickActaNacimiento() async {
+    FilePickerResult? result = await FilePicker.platform.pickFiles(
+      type: FileType.custom,
+      allowedExtensions: ['pdf', 'jpg', 'jpeg', 'png'],
+    );
 
-  if (result != null && result.files.single.path != null) {
-    File file = File(result.files.single.path!);
+    if (result != null && result.files.single.path != null) {
+      File file = File(result.files.single.path!);
 
-    if (await file.exists()) {
-      setState(() {
-        actaNacimiento = file;
-      });
-      print("Archivo seleccionado: ${file.path}");
+      if (await file.exists()) {
+        setState(() {
+          actaNacimiento = file;
+        });
+        print("Archivo seleccionado: ${file.path}");
+      } else {
+        print("El archivo no existe en la ruta seleccionada.");
+      }
     } else {
-      print("El archivo no existe en la ruta seleccionada.");
+      print("No se seleccionó ningún archivo.");
     }
-  } else {
-    print("No se seleccionó ningún archivo.");
   }
-}
-
 
   // Método para seleccionar un archivo específico para PDFs
   Future<void> _pickFile(String type) async {
@@ -95,7 +95,8 @@ class _FormRegistroAlumnoState extends State<FormRegistroAlumno> {
       'telefonoPadre': telefonoPadreController.text,
       'fotoVacunacion': fotoVacunacion,
       'state': 'pendiente',
-      'nota':' '
+      'nota': ' ',
+      'id_Maestro': idmaestro,
     };
   }
 
@@ -390,11 +391,11 @@ class _FormRegistroAlumnoState extends State<FormRegistroAlumno> {
                   style: AppButtons.btnFORM(backgroundColor: AppColors.color2),
                   onPressed: () async {
                     final Map<String, dynamic> data = obtenerDatosFormulario();
-                    final db = AlumnosDB(); // Instancia de la base de datos
-                          
+                    final db = DatabaseHelper(); // Instancia de la base de datos
+
                     try {
                       // Asegúrate de que las rutas a los archivos estén incluidas en `data`
-                      await insertarAlumnoConArchivos(
+                      await db.insertarAlumno(
                           data); // Usa la función con soporte para archivos
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
@@ -416,7 +417,6 @@ class _FormRegistroAlumnoState extends State<FormRegistroAlumno> {
                         ),
                       );
                     }
-                  
                   },
                   child: Text('Enviar Registro'),
                 ),

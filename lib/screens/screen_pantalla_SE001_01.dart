@@ -1,4 +1,5 @@
 import 'package:fepi_local/constansts/app_buttons.dart';
+import 'package:fepi_local/database/database_gestor.dart';
 import 'package:flutter/material.dart';
 import 'package:fepi_local/constansts/app_colors.dart';
 import 'package:fepi_local/constansts/app_text_styles.dart';
@@ -13,11 +14,21 @@ class ScreenPantallaSe001 extends StatefulWidget {
 
 class _ScreenPantallaSe001State extends State<ScreenPantallaSe001> {
   DateTime? _selectedDate;
-  final Map<String, Map<String, dynamic>> _asistenciaProfesores = {
-    'Profesor 1': {'asistencia': false, 'entrada': null, 'salida': null},
-    'Profesor 2': {'asistencia': false, 'entrada': null, 'salida': null},
-    'Profesor 3': {'asistencia': false, 'entrada': null, 'salida': null},
-  };
+  Map<String, Map<String, dynamic>> _asistenciaProfesores = {};
+
+  @override
+  void initState() {
+    super.initState();
+    _cargarDependientes();
+  }
+
+  void _cargarDependientes() async {
+    int idUsuario = 1; // Cambia esto por el id_Usuario que necesites.
+    Map<String, Map<String, dynamic>> dependientes = await DatabaseHelper().obtenerDependientesPorUsuario(idUsuario);
+    setState(() {
+      _asistenciaProfesores = dependientes;
+    });
+  }
 
   void _seleccionarFecha(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
@@ -33,7 +44,7 @@ class _ScreenPantallaSe001State extends State<ScreenPantallaSe001> {
     }
   }
 
-  void _registrarAsistencia() {
+  Future<void> _registrarAsistencia() async {
     if (_selectedDate == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Debe seleccionar una fecha antes de registrar la asistencia.')),
@@ -41,7 +52,24 @@ class _ScreenPantallaSe001State extends State<ScreenPantallaSe001> {
       return;
     }
 
-    // Aquí se pueden guardar los datos en una base de datos o servicio.
+    // Crear un listado con los datos de asistencia, incluyendo la fecha seleccionada
+    List<Map<String, dynamic>> registroAsistencia = _asistenciaProfesores.entries.map((entry) {
+      return {
+        'id_Profesor': entry.value['id_Maestro'],
+        'asistencia': entry.value['asistencia'],
+        'entrada': entry.value['entrada'],
+        'salida': entry.value['salida'],
+        'fecha': _selectedDate!.toIso8601String().split('T')[0], // Fecha en formato YYYY-MM-DD
+      };
+    }).toList();
+
+    final bd = await DatabaseHelper();
+      await bd.insertarAsistencia(registroAsistencia,'1'); // Método para insertar registro en la BD
+    
+
+    // Opcional: Mostrar el resultado en la consola para verificar
+    print('Registro de asistencia: $registroAsistencia');
+
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('Registro de asistencia enviado correctamente.')),
     );
@@ -67,10 +95,10 @@ class _ScreenPantallaSe001State extends State<ScreenPantallaSe001> {
                   ElevatedButton(
                     style: AppButtons.btnFORM(),
                     onPressed: () => _seleccionarFecha(context),
-                    child: Text('Seleccionar Fecha',style:  AppTextStyles.secondMedium(color: AppColors.color1)),
+                    child: Text('Seleccionar Fecha', style: AppTextStyles.secondMedium(color: AppColors.color1)),
                   ),
                   const SizedBox(width: 16),
-                  SizedBox(height: 20,),
+                  const SizedBox(height: 20),
                   Text(
                     _selectedDate == null
                         ? 'No se ha seleccionado fecha'
@@ -100,7 +128,7 @@ class _ScreenPantallaSe001State extends State<ScreenPantallaSe001> {
                           CheckboxListTile(
                             checkColor: AppColors.color1,
                             activeColor: AppColors.color3,
-                            title: Text('Asistencia', style: AppTextStyles.secondRegular(color: AppColors.color2),),
+                            title: Text('Asistencia', style: AppTextStyles.secondRegular(color: AppColors.color2)),
                             value: datos['asistencia'],
                             onChanged: _selectedDate == null
                                 ? null
@@ -116,9 +144,7 @@ class _ScreenPantallaSe001State extends State<ScreenPantallaSe001> {
                           ),
                           const SizedBox(height: 10),
                           TextFormField(
-                            decoration: AppButtons.textFieldStyle(
-                              labelText: 'Horario de entrada',
-                            ),
+                            decoration: AppButtons.textFieldStyle(labelText: 'Horario de entrada'),
                             keyboardType: TextInputType.datetime,
                             enabled: datos['asistencia'],
                             initialValue: datos['entrada'] ?? '',
@@ -130,9 +156,7 @@ class _ScreenPantallaSe001State extends State<ScreenPantallaSe001> {
                           ),
                           const SizedBox(height: 10),
                           TextFormField(
-                            decoration: AppButtons.textFieldStyle(
-                              labelText: 'Horario de salida',
-                            ),
+                            decoration: AppButtons.textFieldStyle(labelText: 'Horario de salida'),
                             keyboardType: TextInputType.datetime,
                             enabled: datos['asistencia'],
                             initialValue: datos['salida'] ?? '',
@@ -153,7 +177,7 @@ class _ScreenPantallaSe001State extends State<ScreenPantallaSe001> {
               child: ElevatedButton(
                 onPressed: _registrarAsistencia,
                 style: AppButtons.btnFORM(backgroundColor: AppColors.color3),
-                child: Text('Enviar Registro',style: AppTextStyles.secondMedium(color: AppColors.color1),),
+                child: Text('Enviar Registro', style: AppTextStyles.secondMedium(color: AppColors.color1)),
               ),
             ),
           ],

@@ -1,27 +1,37 @@
 import 'package:fepi_local/constansts/app_colors.dart';
+import 'package:fepi_local/database/database_gestor.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_pdfview/flutter_pdfview.dart'; // Librería para ver PDF
 import 'package:intl/intl.dart'; // Para manejo de fechas
+import 'package:sqflite/sqflite.dart'; // Asegúrate de importar la biblioteca de sqflite
 
 class CuadriculaDeCards extends StatefulWidget {
+  final int idUsuario=1;
+
+  CuadriculaDeCards();
+
   @override
   _CuadriculaDeCardsState createState() => _CuadriculaDeCardsState();
 }
 
 class _CuadriculaDeCardsState extends State<CuadriculaDeCards> {
-  final Map<String, Map<String, String>> datos = {
-    '1': {'Reporte': 'reporte1.pdf', 'Actividad': 'Actividad 1', 'Fe': 'A', 'Fecha': '2024-12-20'},
-    '2': {'Reporte': 'reporte2.pdf', 'Actividad': 'Actividad 2', 'Fe': 'B', 'Fecha': '2024-12-15'},
-    '3': {'Reporte': 'reporte3.pdf', 'Actividad': 'Actividad 3', 'Fe': 'A', 'Fecha': '2025-01-05'},
-    '4': {'Reporte': 'reporte4.pdf', 'Actividad': 'Actividad 4', 'Fe': 'C', 'Fecha': '2025-02-04'},
-    '5': {'Reporte': 'reporte5.pdf', 'Actividad': 'Actividad 5', 'Fe': 'B', 'Fecha': '2024-11-10'},
-    '6': {'Reporte': 'reporte6.pdf', 'Actividad': 'Actividad 6', 'Fe': 'A', 'Fecha': '2025-03-01'},
-  };
-
+  Map<String, Map<String, String>> datos = {};
   String filtroFe = 'Todos';
   bool ordenAscendente = true;
   DateTime? fechaInicio;
   DateTime? fechaFin;
+
+  @override
+  void initState() {
+    super.initState();
+    cargarDatos();
+  }
+
+  Future<void> cargarDatos() async {
+    final db = await DatabaseHelper(); // Asegúrate de abrir tu base de datos correctamente
+    datos = await db.obtenerReportesPorUsuario(1);
+    setState(() {}); // Actualiza el estado para redibujar la interfaz con los nuevos datos
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -163,10 +173,4 @@ class VistaPDF extends StatelessWidget {
       ),
     );
   }
-}
-
-void main() {
-  runApp(MaterialApp(
-    home: CuadriculaDeCards(),
-  ));
 }

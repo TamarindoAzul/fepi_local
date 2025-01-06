@@ -1,5 +1,7 @@
+import 'dart:convert';
 import 'dart:io';
 import 'package:fepi_local/constansts/app_buttons.dart';
+import 'package:fepi_local/database/database_gestor.dart';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:path_provider/path_provider.dart';
@@ -51,13 +53,51 @@ class _ReportesPantallaSe006_01 extends State<ScreenPantallaSe006_01> {
     );
   }
 
-  void _verReporte(String reportePath) {
+  Future<String> _convertBlobToPdf(String blobData, String fileName) async {
+    final decodedBytes = base64Decode(blobData);
+    final dir = await getApplicationDocumentsDirectory();
+    final file = File('${dir.path}/$fileName.pdf');
+    await file.writeAsBytes(decodedBytes);
+    return file.path;
+  }
+
+  void _verReporte(String blobData) async {
+    final filePath = await _convertBlobToPdf(blobData, 'reporte_temporal');
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => ReporteViewerScreen(reportePath: reportePath),
+        builder: (context) => ReporteViewerScreen(reportePath: filePath),
       ),
     );
+  }
+
+  Future<void> _cargarHistorialEnvios() async {
+    final db = await DatabaseHelper();
+    final reportes = await db
+        .obtenerHistorialEnviosPorUsuario(3); // Cambia el ID si es necesario
+
+    setState(() {
+      print ('+++++++++++++++++++++++++$reportes');
+      historialEnvios.clear();
+      historialEnvios.addAll(
+        reportes
+            .where((reporte) =>
+                reporte['Periodo'] != null &&
+                reporte['Reporte'] != null &&
+                reporte['Estado'] != null)
+            .map((reporte) => {
+                  'Periodo': reporte['Periodo'] as String,
+                  'Reporte': reporte['Reporte'] as String,
+                  'Estado': reporte['Estado'] as String,
+                }),
+      );
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _cargarHistorialEnvios();
   }
 
   @override
@@ -77,16 +117,21 @@ class _ReportesPantallaSe006_01 extends State<ScreenPantallaSe006_01> {
               itemBuilder: (context, index) {
                 final envio = historialEnvios[index];
                 return Card(
-                  margin: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+                  margin: const EdgeInsets.symmetric(
+                      vertical: 8.0, horizontal: 16.0),
                   elevation: 4.0,
                   child: ListTile(
                     leading: Icon(Icons.file_copy, color: AppColors.color2),
                     title: Text(
                       'Periodo: ${envio['Periodo']}',
-                      style: AppTextStyles.primaryRegular(color: AppColors.color3),
+                      style:
+                          AppTextStyles.primaryRegular(color: AppColors.color3),
                     ),
-                    subtitle: Text('Estado: ${envio['Estado']}',style: AppTextStyles.secondRegular(color:AppColors.color2),),
-                    
+                    subtitle: Text(
+                      'Estado: ${envio['Estado']}',
+                      style:
+                          AppTextStyles.secondRegular(color: AppColors.color2),
+                    ),
                     onTap: () => _verReporte(envio['Reporte']!),
                   ),
                 );
@@ -122,6 +167,27 @@ class FormularioReporte extends StatefulWidget {
 }
 
 class _FormularioReporteState extends State<FormularioReporte> {
+  Future<Map<String, dynamic>> convertirArchivoABlobYDevolverMapa({
+    required String periodo,
+    required String estado,
+    required String reportePath,
+    required int idUsuario,
+  }) async {
+    final file = File(reportePath);
+    final fileBytes = await file.readAsBytes();
+
+    // Convertir a un string base64 como una representación de Blob
+    final blobBase64 = base64Encode(fileBytes);
+    
+
+    return {
+      'Periodo': periodo,
+      'Estado': estado,
+      'Reporte': blobBase64,
+      'id_usuario': idUsuario,
+    };
+  }
+
   final TextEditingController _periodoController = TextEditingController();
   final TextEditingController _reporteController = TextEditingController();
   String? _archivoSubido;
@@ -164,6 +230,7 @@ class _FormularioReporteState extends State<FormularioReporte> {
     widget.onGuardar(_periodoController.text, file.path);
   }
 
+  
   Future<void> _subirArchivo() async {
     final result = await FilePicker.platform
         .pickFiles(type: FileType.custom, allowedExtensions: ['pdf']);
@@ -182,7 +249,8 @@ class _FormularioReporteState extends State<FormularioReporte> {
         mainAxisSize: MainAxisSize.min,
         children: [
           TextField(
-            decoration: AppButtons.textFieldStyle(labelText: 'Periodo',hintText: 'DD_MM_AAAA-DD_MM_AAAA'),
+            decoration: AppButtons.textFieldStyle(
+                labelText: 'Periodo', hintText: 'DD_MM_AAAA-DD_MM_AAAA'),
             controller: _periodoController,
           ),
           const SizedBox(height: 10),
@@ -190,7 +258,10 @@ class _FormularioReporteState extends State<FormularioReporte> {
             activeColor: AppColors.color3,
             checkColor: AppColors.color1,
             hoverColor: AppColors.color2,
-            title:  Text('Redactar Reporte', style: AppTextStyles.secondMedium(),),
+            title: Text(
+              'Redactar Reporte',
+              style: AppTextStyles.secondMedium(),
+            ),
             value: _escribirReporte,
             onChanged: (value) {
               setState(() {
@@ -207,27 +278,59 @@ class _FormularioReporteState extends State<FormularioReporte> {
             ),
           if (!_escribirReporte)
             ElevatedButton(
-              style: AppButtons.btnFORM(backgroundColor:_archivoSubido==null? AppColors.color2: AppColors.color3),
+              style: AppButtons.btnFORM(
+                  backgroundColor: _archivoSubido == null
+                      ? AppColors.color2
+                      : AppColors.color3),
               onPressed: _subirArchivo,
-              child: Text(_archivoSubido==null?'Seleccionar Archivo':'Archivo Seleccionado'),
+              child: Text(_archivoSubido == null
+                  ? 'Seleccionar Archivo'
+                  : 'Archivo Seleccionado'),
             ),
           const SizedBox(height: 20),
-        if(_archivoSubido != null || _escribirReporte)ElevatedButton(
-            style: AppButtons.btnFORM(backgroundColor: AppColors.color2),
-            onPressed: () {
-              if (_escribirReporte) {
-                _guardarComoPDF();
-              } else if (_archivoSubido != null) {
-                widget.onGuardar(_periodoController.text, _archivoSubido!);
-              }
-            },
-            child: const Text('Guardar'),
-          ),
+          if (_archivoSubido != null || _escribirReporte)
+            ElevatedButton(
+              style: AppButtons.btnFORM(backgroundColor: AppColors.color2),
+              onPressed: () async {
+                int idUsuario = 3; // Puedes obtener esto dinámicamente
+                String? reportePath;
+
+                if (_escribirReporte) {
+                  // Guarda el archivo como PDF y obtén la ruta
+                  await _guardarComoPDF();
+                  final dir = await getApplicationDocumentsDirectory();
+                  reportePath =
+                      '${dir.path}/reporte_${_periodoController.text}.pdf';
+                } else if (_archivoSubido != null) {
+                  reportePath = _archivoSubido;
+                }
+                print(reportePath);
+                if (reportePath != null) {
+                  // Convierte el archivo a blob y genera el mapa
+                  final mapa = await convertirArchivoABlobYDevolverMapa(
+                    periodo: _periodoController.text,
+                    estado: 'pendiente',
+                    reportePath: reportePath,
+                    idUsuario: idUsuario,
+                  );
+                  final db = await DatabaseHelper();
+                  db.insertarReporte(mapa);
+                  print('Listo papu');
+                  print(
+                      "Mapa generado: $mapa"); // Aquí puedes reemplazar con tu lógica
+                } else {
+                  print('No se seleccionó o generó un archivo válido.');
+                }
+              },
+              child: const Text('Guardar'),
+            ),
         ],
       ),
     );
   }
 }
+
+
 
 class ReporteViewerScreen extends StatefulWidget {
   final String reportePath;
@@ -271,8 +374,11 @@ class _ReporteViewerScreenState extends State<ReporteViewerScreen> {
         },
         autoSpacing: true,
         pageSnap: true,
-        enableSwipe: true, // Habilita desplazamiento por deslizamiento
-        swipeHorizontal: false, // Configura si es horizontal o vertical
+        enableSwipe: true, // Habilita el swipe para navegar por las páginas
+        swipeHorizontal: false,
+        onError: (error) {
+          print('Error en el visor de PDF: $error');
+        },
       ),
     );
   }

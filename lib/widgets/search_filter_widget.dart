@@ -56,13 +56,13 @@ class _SearchFilterWidgetState extends State<SearchFilterWidget> {
         Flexible(
           child: ListView.builder(
             itemCount: widget.data
-                .where((item) => item['NombreCompleto']!.contains(query) && 
+                .where((item) => item['Nombre']!.contains(query) && 
                                   (filterStatus == 'Todos' || item['Estatus'] == filterStatus))
                 .toList()
                 .length,
             itemBuilder: (context, index) {
               final filteredData = widget.data
-                  .where((item) => item['NombreCompleto']!.contains(query) && 
+                  .where((item) => item['Nombre']!.contains(query) && 
                                     (filterStatus == 'Todos' || item['Estatus'] == filterStatus))
                   .toList();
               return DynamicTableWidget(data: [filteredData[index]]);
