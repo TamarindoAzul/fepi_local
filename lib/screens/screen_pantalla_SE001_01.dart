@@ -1,8 +1,10 @@
 import 'package:fepi_local/constansts/app_buttons.dart';
 import 'package:fepi_local/database/database_gestor.dart';
+import 'package:fepi_local/routes/getSavedPreferences.dart';
 import 'package:flutter/material.dart';
 import 'package:fepi_local/constansts/app_colors.dart';
 import 'package:fepi_local/constansts/app_text_styles.dart';
+import 'package:go_router/go_router.dart';
 
 class ScreenPantallaSe001 extends StatefulWidget {
   static const String routeName = '/screen_pantalla_se001';
@@ -23,7 +25,8 @@ class _ScreenPantallaSe001State extends State<ScreenPantallaSe001> {
   }
 
   void _cargarDependientes() async {
-    int idUsuario = 1; // Cambia esto por el id_Usuario que necesites.
+    final prefs = await getSavedPreferences();
+    int idUsuario = prefs['id_Usuario'] ?? 0; // Cambia esto por el id_Usuario que necesites.
     Map<String, Map<String, dynamic>> dependientes = await DatabaseHelper().obtenerDependientesPorUsuario(idUsuario);
     setState(() {
       _asistenciaProfesores = dependientes;
@@ -78,7 +81,9 @@ class _ScreenPantallaSe001State extends State<ScreenPantallaSe001> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      
       appBar: AppBar(
+        leading: IconButton(icon: Icon(Icons.arrow_back_rounded, color: AppColors.color1,),onPressed:(){context.pop();}),
         title: const Text('Monitoreo del desempeño de EC'),
         titleTextStyle: AppTextStyles.primaryRegular(color: AppColors.color1),
         backgroundColor: AppColors.color3,

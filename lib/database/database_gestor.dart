@@ -46,8 +46,8 @@ class DatabaseHelper {
     await _createActCAPTable(db);
     await _createPromocionFechasTable(db);
     await _createFechasPagoTable(db);
-    await insertMassiveDataForAllTables(db);
-    await printAllTables(db);
+    //await insertMassiveDataForAllTables();
+    //await printAllTables();
   }
 
   Future<void> _createAlumnosTable(Database db) async {
@@ -280,204 +280,47 @@ class DatabaseHelper {
     ''');
   }
 
-  Future<void> insertMassiveDataForAllTables(Database db) async {
-    // 1. Insertar datos en Comunidad
-    for (int i = 1; i <= 5; i++) {
-      await db.insert('Comunidad', {
-        'claveMicroRegion': 'CMR00$i',
-        'Nombre': 'Comunidad $i',
-      });
-    }
+  
 
-    for (int i = 1; i <= 20; i++) {
-      await db.insert('PagosFechas', {
-        'fecha': i > 9 ? '2025-01-$i' : '2025-01-0$i',
-        'tipoPago': 'a',
-        'monto': '2000.20',
-        'id_Usuario': 1,
-      });
-    }
 
-    // 2. Insertar datos en DatosUsuarios
-    for (int i = 1; i <= 20; i++) {
-      await db.insert('DatosUsuarios', {
-        'id_Comunidad': (i % 5) + 1,
-        'nombreCompleto': 'Nombre Personal $i',
-        'situacion_Educativa': 'Situación $i',
-        'tipoServicio': 'Servicio $i',
-        'contexto': 'Contexto $i',
-        'Estado': i % 2 == 0 ? 1 : 0,
-      });
-    }
 
-    // 3. Insertar datos en Usuarios
-    List<String> roles = ['EC', 'ECAR', 'ECA', 'APEC'];
-    List<int> ecUsers = [];
-    List<int> ecarUsers = [];
-    for (int i = 1; i <= 20; i++) {
-      String role = roles[i % roles.length];
-      int userId = await db.insert('Usuarios', {
-        'usuario': 'usuario$i',
-        'password': 'password$i',
-        'rol': role,
-        'id_Datos': i,
-      });
 
-      if (role == 'EC') ecUsers.add(userId);
-      if (role == 'ECAR') ecarUsers.add(userId);
-    }
 
-    // 4. Insertar datos en Dependencias
-    for (int ecId in ecUsers) {
-      for (int ecarId in ecarUsers) {
-        await db.insert('Dependencias', {
-          'id_Dependiente': ecId,
-          'id_Responsable': ecarId,
-        });
-      }
-    }
 
-    for (int ecaId in ecarUsers) {
-      await db.insert('Dependencias', {
-        'id_Dependiente': ecaId,
-        'id_Responsable': ecUsers[ecaId % ecUsers.length],
-      });
-    }
 
-    // 5. Insertar datos en Alumnos
-    for (int i = 1; i <= 20; i++) {
-      await db.insert('Alumnos', {
-        'actaNacimiento': null,
-        'curp': 'CURP$i',
-        'fechaNacimiento': '200$i-01-01',
-        'lugarNacimiento': 'Lugar $i',
-        'domicilio': 'Domicilio $i',
-        'municipio': 'Municipio $i',
-        'estado': 'Estado $i',
-        'nivelEducativo': 'Nivel $i',
-        'gradoEscolar': 'Grado $i',
-        'certificadoEstudios': null,
-        'nombrePadre': 'Padre $i',
-        'ocupacionPadre': 'Ocupación $i',
-        'telefonoPadre': '12345678$i',
-        'fotoVacunacion': null,
-        'state': 'Activo',
-        'nota': 'Nota $i',
-        'id_Maestro': (i % 20) + 1,
-      });
-    }
 
-    // 6. Insertar datos en ActividadAcomp
-    for (int i = 1; i <= 20; i++) {
-      await db.insert('ActividadAcomp', {
-        'id_Usuario': (i % 20) + 1,
-        'fecha': '2024-01-01',
-        'hora': '10:00:00',
-        'nombreEC': 'Educador Comunitario $i',
-        'descripcion': 'Actividad $i',
-        'estado': i % 2 == 0 ? 'activo' : 'inactivo',
-      });
-    }
 
-    // 7. Insertar datos en Reportes
-    for (int i = 1; i <= 20; i++) {
-      await db.insert('Reportes', {
-        'periodo': 'Periodo $i',
-        'estado': i % 2 == 0 ? 'Aprobado' : 'Pendiente',
-        'reporte': null,
-        'id_usuario': i,
-      });
-    }
 
-    // 8. Insertar datos en Calificaciones
-    for (int i = 1; i <= 20; i++) {
-      await db.insert('Calificaciones', {
-        'id_ActAlum': (i % 10) + 1,
-        'id_Alumno': (i % 20) + 1,
-        'calificacion': (i % 10) + 1,
-        'observacion': 'Observación $i',
-      });
-    }
 
-    // 9. Insertar datos en RegistroMoviliario
-    for (int i = 1; i <= 10; i++) {
-      await db.insert('RegistroMoviliario', {
-        'id_Comunidad': (i % 5) + 1,
-        'nombre': 'Mobiliario $i',
-        'cantidad': i * 10,
-        'condicion': i % 2 == 0 ? 'Bueno' : 'Regular',
-        'comentarios': 'Comentario $i',
-        'periodo': '2024',
-        'id_Usuario': (i % 20) + 1,
-      });
-    }
 
-    // 10. Insertar datos en ReportesAcomp
-    for (int i = 1; i <= 20; i++) {
-      await db.insert('ReportesAcomp', {
-        'reporte': 'Juan',
-        'id_ActividadAcomp': (i % 20) + 1,
-        'fecha': i<9? '2024-02-0$i':'2024-02-$i',
-        'figuraEducativa': 'Figura $i',
-        'id_Usuario': (i % 20) + 1,
-      });
-    }
 
-    // 11. Insertar datos en Asistencia
-    for (int i = 1; i <= 10; i++) {
-      await db.insert('Asistencia', {
-        'id_Profesor': (i % 20) + 1,
-        'fecha': '2024-01-0$i',
-        'usuario': 'usuario$i',
-        'horaEntrada': '08:0$i:00',
-        'horaSalida': '16:0$i:00',
-        'Asistencia': i % 2 == 0 ? 1 : 0,
-      });
-    }
 
-    // 12. Insertar datos en Actividad_Alumnos
-    for (int i = 1; i <= 10; i++) {
-      await db.insert('Actividad_Alumnos', {
-        'titulo': 'Actividad $i',
-        'descripcion': 'Descripción de actividad $i',
-        'periodo': '2024',
-        'materia': 'Materia $i',
-        'estado': i % 2 == 0 ? 'Completado' : 'Pendiente',
-      });
-    }
 
-    // 13. Insertar datos en Recibo
-    for (int i = 1; i <= 10; i++) {
-      await db.insert('Recibo', {
-        'id_Usuario': (i % 20) + 1,
-        'recibo': null,
-        'tipoRecibo': 'Tipo $i',
-      });
-    }
 
-    // 14. Insertar datos en ActCAP
-    for (int i = 1; i <= 10; i++) {
-      await db.insert('ActCAP', {
-        'id_Usuario': (i % 20) + 1,
-        'NumCapacitacion': i,
-        'TEMA': 'Tema $i',
-        'ClaveRegion': 'CR$i',
-        'NombreRegion': 'Región $i',
-        'FechaProgramada': i<9? '2024-02-0$i':'2024-02-$i',
-        'Estado': 'Pendiente',
-        'Reporte': 'Reporte $i',
-      });
-    }
-    // 15. Insertar datos en PEPE
-    for (int i = 1; i <= 20; i++) {
-      await db.insert('PromocionFechas', {
-        'promocionPDF':Uint8List.fromList(utf8.encode('Archivo')),
-        'fechas': '2025-01-01,2025-01-02,2025-01-03,2025-01-04,'
-      });
-    }
-    }
 
-  Future<void> printAllTables(Database db) async {
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
+
+  Future<void> printAllTables() async {
+    final db= await database;
     // Obtener el nombre de todas las tablas en la base de datos
     List<Map<String, dynamic>> tables = await db.rawQuery(
         "SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%';");
@@ -499,6 +342,31 @@ class DatabaseHelper {
       print('\n');
     }
   }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
   ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -564,9 +432,9 @@ class DatabaseHelper {
 
     // Paso 1: Consulta los IDs de los responsables
     final List<Map<String, dynamic>> dependencias = await db.rawQuery('''
-    SELECT id_Responsable
+    SELECT id_Dependiente
     FROM Dependencias
-    WHERE id_Dependiente = ?
+    WHERE  id_Responsable = ?
   ''', [idUsuario]);
 
     if (dependencias.isEmpty) {
@@ -575,7 +443,7 @@ class DatabaseHelper {
 
     // Extrae los IDs de los responsables como una lista
     final List<int> responsablesIds =
-        dependencias.map((e) => e['id_Responsable'] as int).toList();
+        dependencias.map((e) => e['id_Dependiente'] as int).toList();
 
     // Verifica que la lista no esté vacía antes de construir la consulta
     if (responsablesIds.isEmpty) {
@@ -704,6 +572,47 @@ class DatabaseHelper {
   }
 
 
+  Future<List<Map<String, dynamic>>> obtenerHistorialEnviosPorUsuarioDEP(
+    int idUsuario) async {
+  // Abre la base de datos
+  final db = await database;
+
+  // Paso 1: Obtener los IDs de los dependientes del usuario
+  final List<Map<String, dynamic>> dependientes = await db.query(
+    'Dependencias',
+    columns: ['id_Dependiente'],
+    where: 'id_Responsable = ?',
+    whereArgs: [idUsuario],
+  );
+
+  if (dependientes.isEmpty) {
+    return []; // Retorna una lista vacía si no hay dependientes
+  }
+
+  // Extraer los IDs de los dependientes en una lista
+  final List<int> idsDependientes =
+      dependientes.map((e) => e['id_Dependiente'] as int).toList();
+
+  // Paso 2: Construir la consulta para obtener los reportes de los dependientes
+  final List<Map<String, dynamic>> resultado = await db.query(
+    'Reportes',
+    columns: ['periodo', 'reporte', 'estado', 'id_usuario'],
+    where: 'id_usuario IN (${idsDependientes.map((_) => '?').join(', ')})',
+    whereArgs: idsDependientes,
+  );
+
+  // Paso 3: Transformar los datos para el historial de envíos
+  final List<Map<String, dynamic>> historialEnvios = resultado.map((fila) {
+    return {
+      'Periodo': fila['periodo'] as String,
+      'Reporte': fila['reporte'],
+      'Estado': fila['estado'] as String,
+      'Usuario': fila['id_usuario'], // Agregamos el ID del dependiente para referencia
+    };
+  }).toList();
+
+  return historialEnvios;
+}
 
 
 
@@ -1011,15 +920,17 @@ Future<void> cambiarEstadoYRegistrarReporte( int idActividad, int idUsuario, Str
   }
 }
 
-Future<Map<String, Map<String, String>>> obtenerActividadesPorNombreEC(String nombreEC) async {
+Future<Map<String, Map<String, String>>> obtenerActividadesPorNombreEC(int id) async {
   final db = await database;
 
   // Realizar la consulta para obtener las actividades relacionadas con el nombreEC
-  final List<Map<String, dynamic>> actividades = await db.query(
-    'ActividadAcomp',
-    where: 'nombreEC = ?',
-    whereArgs: [nombreEC],
-  );
+  final List<Map<String, dynamic>> actividades = await db.rawQuery('''
+  SELECT a.*
+  FROM ActividadAcomp a
+  INNER JOIN Dependencias d ON a.id_Usuario = d.id_Responsable
+  WHERE d.id_Dependiente = ?
+''', [id]);
+
 
   // Crear un Map<String, Map<String, String>> con las actividades
   Map<String, Map<String, String>> actividadesMap = {};
@@ -1038,7 +949,7 @@ Future<Map<String, Map<String, String>>> obtenerActividadesPorNombreEC(String no
 
 
 
-Future<Map<String, Map<String, String>>> obtenerReportesPorUsuario(int idUsuario) async {
+Future<Map<String, Map<String,dynamic>>> obtenerReportesPorUsuario(int idUsuario) async {
   // Obtener la instancia de la base de datos
   final Database db = await database;
 
@@ -1063,7 +974,7 @@ Future<Map<String, Map<String, String>>> obtenerReportesPorUsuario(int idUsuario
   ''', [idUsuario]);
 
   // Convertir los resultados en el mapa deseado
-  Map<String, Map<String, String>> reportesMap = {};
+  Map<String, Map<String, dynamic>> reportesMap = {};
   for (var resultado in resultados) {
     String id = resultado['idReporte'].toString();
     reportesMap[id] = {

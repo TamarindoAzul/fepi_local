@@ -1,12 +1,13 @@
 import 'package:fepi_local/constansts/app_colors.dart';
 import 'package:fepi_local/constansts/app_text_styles.dart';
 import 'package:fepi_local/database/database_gestor.dart';
+import 'package:fepi_local/routes/getSavedPreferences.dart';
 import 'package:fepi_local/widgets/form_registro_alumno.dart';
 import 'package:fepi_local/widgets/lista_alumnos_Alta.dart';
 import 'package:flutter/material.dart';
-
+import 'package:go_router/go_router.dart';
 class ScreenPantallaPl013_01 extends StatefulWidget {
-  static const String routeName = '/screen__pantalla_pl013_01';
+  static const String routeName = '/screen_pantalla_pl013_01';
 
   @override
   _ScreenPantallaPl013_01State createState() => _ScreenPantallaPl013_01State();
@@ -41,8 +42,9 @@ class _ScreenPantallaPl013_01State extends State<ScreenPantallaPl013_01>
 
   // Método para cargar datos de la base de datos
   Future<void> _loadData() async {
+    final prefs = await getSavedPreferences();
     final db = DatabaseHelper();
-    final alumnos = await db.cargarAlumnosPorMaestro(1);
+    final alumnos = await db.cargarAlumnosPorMaestro(prefs['id_Usuario'] ?? 0);
     setState(() {
       _data = alumnos;
     });
@@ -52,6 +54,7 @@ class _ScreenPantallaPl013_01State extends State<ScreenPantallaPl013_01>
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        leading: IconButton(icon: Icon(Icons.arrow_back_rounded, color: AppColors.color1,),onPressed:(){context.pop();}),
         titleTextStyle: AppTextStyles.primaryRegular(color: AppColors.color1),
         backgroundColor: AppColors.color3,
         centerTitle: true,

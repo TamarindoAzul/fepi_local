@@ -59,13 +59,13 @@ class _LoginScreenState extends State<LoginScreen> {
 
         // Redirigir según el rol del usuario
         if (rol == 'EC') {
-          context.go('/screen__pantalla_pl013_01');
+          context.go('/screen_Inicio_EC');
         } else if (rol == 'ECAR') {
-          context.go('/ecar_home');
+          context.go('/screen_Inicio_ECAR');
         } else if (rol == 'ECA') {
-          context.go('/eca_home');
+          context.go('/screen_Inicio_ECA');
         } else if (rol == 'APEC') {
-          context.go('/apec_home');
+          context.go('/screen_Inicio_APEC');
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text('Rol de usuario desconocido', style: AppTextStyles.secondMedium())),

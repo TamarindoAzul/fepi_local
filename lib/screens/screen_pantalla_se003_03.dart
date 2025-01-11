@@ -2,6 +2,7 @@ import 'package:fepi_local/widgets/grid_reportes.dart';
 import 'package:flutter/material.dart';
 import 'package:fepi_local/constansts/app_colors.dart';
 import 'package:fepi_local/constansts/app_text_styles.dart';
+import 'package:go_router/go_router.dart';
 
 
 class ScrenPantallaSe00303 extends StatelessWidget {
@@ -12,6 +13,7 @@ class ScrenPantallaSe00303 extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        leading: IconButton(icon: Icon(Icons.arrow_back_rounded, color: AppColors.color1,),onPressed:(){context.pop();}),
         title: Text('Actividades asignadas'),
         titleTextStyle: AppTextStyles.primaryRegular(color: AppColors.color1),
         backgroundColor: AppColors.color3,

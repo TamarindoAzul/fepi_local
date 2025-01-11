@@ -1,5 +1,6 @@
 import 'dart:ui';
 
+import 'package:fepi_local/constansts/app_colors.dart';
 import 'package:fepi_local/widgets/pdf_creador.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_signature_pad/flutter_signature_pad.dart'; // Paquete para la firma
@@ -8,6 +9,7 @@ import 'package:flutter/services.dart' show rootBundle;
 import 'package:path_provider/path_provider.dart';
 import 'dart:io';
 import 'package:syncfusion_flutter_pdf/pdf.dart';
+import 'package:go_router/go_router.dart';
 
 class FormularioEntrega extends StatefulWidget {
   static const String routeName = '/screen_pantalla_eq02_02';
@@ -28,6 +30,7 @@ class _FormularioEntregaState extends State<FormularioEntrega> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        leading: IconButton(icon: Icon(Icons.arrow_back_rounded, color: AppColors.color1,),onPressed:(){context.pop();}),
         title: const Text('Formulario de Entrega'),
         centerTitle: true,
       ),

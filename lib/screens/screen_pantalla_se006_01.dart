@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:fepi_local/constansts/app_buttons.dart';
 import 'package:fepi_local/database/database_gestor.dart';
+import 'package:fepi_local/routes/getSavedPreferences.dart';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:path_provider/path_provider.dart';
@@ -10,6 +11,7 @@ import 'package:fepi_local/constansts/app_colors.dart';
 import 'package:fepi_local/constansts/app_text_styles.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
+import 'package:go_router/go_router.dart';
 
 class ScreenPantallaSe006_01 extends StatefulWidget {
   static const String routeName = '/screen_pantalla_se006_01';
@@ -61,7 +63,7 @@ class _ReportesPantallaSe006_01 extends State<ScreenPantallaSe006_01> {
     return file.path;
   }
 
-  void _verReporte(String blobData) async {
+  void _verReporte(dynamic blobData) async {
     final filePath = await _convertBlobToPdf(blobData, 'reporte_temporal');
     Navigator.push(
       context,
@@ -72,9 +74,10 @@ class _ReportesPantallaSe006_01 extends State<ScreenPantallaSe006_01> {
   }
 
   Future<void> _cargarHistorialEnvios() async {
+    final prefs = await getSavedPreferences();
     final db = await DatabaseHelper();
     final reportes = await db
-        .obtenerHistorialEnviosPorUsuario(3); // Cambia el ID si es necesario
+        .obtenerHistorialEnviosPorUsuario(prefs['id_Usuario'] ?? 0); // Cambia el ID si es necesario
 
     setState(() {
       print ('+++++++++++++++++++++++++$reportes');
@@ -105,6 +108,7 @@ class _ReportesPantallaSe006_01 extends State<ScreenPantallaSe006_01> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Gestión de Reportes'),
+        leading: IconButton(icon: Icon(Icons.arrow_back_rounded, color: AppColors.color1,),onPressed:(){context.pop();}),
         titleTextStyle: AppTextStyles.primaryRegular(color: AppColors.color1),
         backgroundColor: AppColors.color3,
         centerTitle: true,
@@ -292,7 +296,8 @@ class _FormularioReporteState extends State<FormularioReporte> {
             ElevatedButton(
               style: AppButtons.btnFORM(backgroundColor: AppColors.color2),
               onPressed: () async {
-                int idUsuario = 3; // Puedes obtener esto dinámicamente
+                final prefs = await getSavedPreferences();
+                int idUsuario = prefs['id_Usuario'] ?? 0;
                 String? reportePath;
 
                 if (_escribirReporte) {
@@ -315,7 +320,7 @@ class _FormularioReporteState extends State<FormularioReporte> {
                   );
                   final db = await DatabaseHelper();
                   db.insertarReporte(mapa);
-                  print('Listo papu');
+                 
                   print(
                       "Mapa generado: $mapa"); // Aquí puedes reemplazar con tu lógica
                 } else {

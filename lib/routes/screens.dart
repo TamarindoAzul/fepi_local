@@ -1,5 +1,12 @@
-export 'package:fepi_local/screens/screen_pantalla_pc003_01.dart';
+export 'package:fepi_local/screens/screen_pantalla_se006_02.dart';
 
+export 'package:fepi_local/screens/screen_pantalla_cp002.dart';
+
+export 'package:fepi_local/screens/Inicio_APEC.dart';
+export 'package:fepi_local/screens/Inicio_ECA.dart';
+export 'package:fepi_local/screens/Inicio_ECAR.dart';
+export 'package:fepi_local/screens/Inicio_EC.dart';
+export 'package:fepi_local/screens/screen_pantalla_pc003_01.dart';
 export 'package:fepi_local/screens/screen_pantalla_se002_01.dart';
 export 'package:fepi_local/screens/screen_pantalla_se002_02.dart';
 export 'package:fepi_local/screens/screen_pantalla_se002_03.dart';

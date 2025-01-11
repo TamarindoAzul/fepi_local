@@ -1,13 +1,14 @@
-import 'package:fepi_local/constansts/app_colors.dart';
+import 'dart:io';
+import 'dart:typed_data';
 import 'package:fepi_local/database/database_gestor.dart';
+import 'package:fepi_local/routes/getSavedPreferences.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_pdfview/flutter_pdfview.dart'; // Librería para ver PDF
-import 'package:intl/intl.dart'; // Para manejo de fechas
-import 'package:sqflite/sqflite.dart'; // Asegúrate de importar la biblioteca de sqflite
+import 'package:flutter_pdfview/flutter_pdfview.dart';
+import 'package:intl/intl.dart';
+import 'package:path_provider/path_provider.dart'; // Librería para manejo de archivos y rutas
+import 'package:sqflite/sqflite.dart';
 
 class CuadriculaDeCards extends StatefulWidget {
-  final int idUsuario=1;
-
   CuadriculaDeCards();
 
   @override
@@ -15,7 +16,7 @@ class CuadriculaDeCards extends StatefulWidget {
 }
 
 class _CuadriculaDeCardsState extends State<CuadriculaDeCards> {
-  Map<String, Map<String, String>> datos = {};
+  Map<String, Map<String, dynamic>> datos = {};
   String filtroFe = 'Todos';
   bool ordenAscendente = true;
   DateTime? fechaInicio;
@@ -28,18 +29,34 @@ class _CuadriculaDeCardsState extends State<CuadriculaDeCards> {
   }
 
   Future<void> cargarDatos() async {
-    final db = await DatabaseHelper(); // Asegúrate de abrir tu base de datos correctamente
-    datos = await db.obtenerReportesPorUsuario(1);
-    setState(() {}); // Actualiza el estado para redibujar la interfaz con los nuevos datos
+    final prefs = await getSavedPreferences();
+    final db = await DatabaseHelper();
+    datos = await db.obtenerReportesPorUsuario(prefs['id_Usuario'] ?? 0);
+    setState(() {});
+  }
+
+  Future<String> convertirAReporteLocal(Uint8List reporte, String nombre) async {
+    // Obtener el directorio temporal
+    final tempDir = await getTemporaryDirectory();
+    final filePath = '${tempDir.path}/$nombre.pdf';
+
+    // Crear y escribir el archivo
+    final file = File(filePath);
+    await file.writeAsBytes(reporte);
+
+    return filePath;
   }
 
   @override
   Widget build(BuildContext context) {
-    List<MapEntry<String, Map<String, String>>> listaDatos = datos.entries.toList();
+    List<MapEntry<String, Map<String, dynamic>>> listaDatos =
+        datos.entries.toList();
 
     // Filtrar por 'Fe'
     if (filtroFe != 'Todos') {
-      listaDatos = listaDatos.where((entrada) => entrada.value['Fe'] == filtroFe).toList();
+      listaDatos = listaDatos
+          .where((entrada) => entrada.value['Fe'] == filtroFe)
+          .toList();
     }
 
     // Filtrar por rango de fechas
@@ -54,7 +71,9 @@ class _CuadriculaDeCardsState extends State<CuadriculaDeCards> {
     listaDatos.sort((a, b) {
       DateTime fechaA = DateTime.parse(a.value['Fecha']!);
       DateTime fechaB = DateTime.parse(b.value['Fecha']!);
-      return ordenAscendente ? fechaA.compareTo(fechaB) : fechaB.compareTo(fechaA);
+      return ordenAscendente
+          ? fechaA.compareTo(fechaB)
+          : fechaB.compareTo(fechaA);
     });
 
     return Scaffold(
@@ -67,15 +86,24 @@ class _CuadriculaDeCardsState extends State<CuadriculaDeCards> {
                 filtroFe = value;
               });
             },
-            itemBuilder: (context) => [
-              PopupMenuItem(value: 'Todos', child: Text('Todos')),
-              PopupMenuItem(value: 'A', child: Text('Fe A')),
-              PopupMenuItem(value: 'B', child: Text('Fe B')),
-              PopupMenuItem(value: 'C', child: Text('Fe C')),
-            ],
+            itemBuilder: (context) {
+              List<String> opciones = datos.values
+                  .map((mapa) => mapa['Fe'] as String)
+                  .toSet()
+                  .toList();
+              opciones.insert(0, 'Todos');
+
+              return opciones.map((opcion) {
+                return PopupMenuItem(
+                  value: opcion,
+                  child: Text(opcion == 'Todos' ? 'Todos' : opcion),
+                );
+              }).toList();
+            },
           ),
           IconButton(
-            icon: Icon(ordenAscendente ? Icons.arrow_upward : Icons.arrow_downward),
+            icon: Icon(
+                ordenAscendente ? Icons.arrow_upward : Icons.arrow_downward),
             onPressed: () {
               setState(() {
                 ordenAscendente = !ordenAscendente;
@@ -114,14 +142,16 @@ class _CuadriculaDeCardsState extends State<CuadriculaDeCards> {
             final entrada = listaDatos[index];
             final actividad = entrada.value['Actividad'];
             final fecha = entrada.value['Fecha'];
-            final reporte = entrada.value['Reporte'];
+            final reporte = entrada.value['Reporte'] as Uint8List;
 
             return GestureDetector(
-              onTap: () {
+              onTap: () async {
+                final rutaPDF = await convertirAReporteLocal(
+                    reporte, 'Reporte_${entrada.key}');
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => VistaPDF(rutaPDF: reporte!),
+                    builder: (context) => VistaPDF(rutaPDF: rutaPDF),
                   ),
                 );
               },
@@ -133,7 +163,7 @@ class _CuadriculaDeCardsState extends State<CuadriculaDeCards> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(Icons.file_present, size: 48, color: AppColors.color3),
+                    Icon(Icons.file_present, size: 48, color: Colors.blue),
                     SizedBox(height: 16),
                     Text(
                       actividad!,

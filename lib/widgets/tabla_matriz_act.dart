@@ -1,4 +1,5 @@
 import 'package:fepi_local/database/database_gestor.dart';
+import 'package:fepi_local/routes/getSavedPreferences.dart';
 import 'package:flutter/material.dart';
 import 'package:sqflite/sqflite.dart';
 
@@ -25,9 +26,9 @@ class _TablaMatrizActState extends State<TablaMatrizAct> {
   // Aquí va la función para insertar los datos
   Future<void> insertarDatosActCAP(Map<String, dynamic> datos) async {
     final db = await DatabaseHelper(); // Reemplaza con tu base de datos
-
+    final prefs = await getSavedPreferences();
     final Map<String, dynamic> dataToInsert = {
-      'id_Usuario': '1', // Asegúrate de obtener el id_Usuario correctamente
+      'id_Usuario': prefs['id_Usuario'] ?? 0, 
       'NumCapacitacion': datos['NumeroCapacitacion'],
       'TEMA': datos['Tema'],
       'ClaveRegion': datos['ClaveRegion'],

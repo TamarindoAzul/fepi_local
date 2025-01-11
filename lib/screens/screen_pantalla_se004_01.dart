@@ -2,6 +2,7 @@ import 'package:fepi_local/constansts/app_buttons.dart';
 import 'package:fepi_local/constansts/app_colors.dart';
 import 'package:fepi_local/constansts/app_text_styles.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 class ScreenPantallaSe00401 extends StatefulWidget {
   static const String routeName = '/screen_pantalla_se00401';
@@ -41,6 +42,7 @@ class _ScreenPantallaSe00401State extends State<ScreenPantallaSe00401>
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
+        
         title: const Text("Crear Actividad"),
         content: Column(
           mainAxisSize: MainAxisSize.min,
@@ -130,6 +132,7 @@ class _ScreenPantallaSe00401State extends State<ScreenPantallaSe00401>
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        leading: IconButton(icon: Icon(Icons.arrow_back_rounded, color: AppColors.color1,),onPressed:(){context.pop();}),
         title: const Text('Evaluación de alumnos'),
         titleTextStyle: AppTextStyles.primaryRegular(color: AppColors.color1),
         backgroundColor: AppColors.color3,

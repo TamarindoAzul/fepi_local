@@ -1,9 +1,11 @@
 import 'package:fepi_local/database/database_gestor.dart';
+import 'package:fepi_local/routes/getSavedPreferences.dart';
 import 'package:flutter/material.dart';
 import 'package:fepi_local/constansts/app_colors.dart';
 import 'package:fepi_local/constansts/app_text_styles.dart';
 import 'package:table_calendar/table_calendar.dart';
-import 'package:sqflite/sqflite.dart'; // Asegúrate de tener esta importación para trabajar con la base de datos
+import 'package:sqflite/sqflite.dart';
+import 'package:go_router/go_router.dart';
 
 class ScreenPantallaBe002 extends StatefulWidget {
   static const String routeName = '/screen_pantalla_be002';
@@ -28,7 +30,8 @@ class _ScreenPantallaBe002State extends State<ScreenPantallaBe002> {
     final db = DatabaseHelper(); // Ajusta la ruta de la base de datos
 
     // Obtén los pagos por usuario (puedes reemplazar '1' con el id de usuario que necesites)
-    Map<String, List<Map<String, dynamic>>> pagos = await db.obtenerPagosPorUsuario(1);
+    final prefs = await getSavedPreferences();
+    Map<String, List<Map<String, dynamic>>> pagos = await db.obtenerPagosPorUsuario(prefs['id_Usuario'] ?? 0);
 
     setState(() {
       paymentData = pagos;
@@ -39,6 +42,7 @@ class _ScreenPantallaBe002State extends State<ScreenPantallaBe002> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        leading: IconButton(icon: Icon(Icons.arrow_back_rounded, color: AppColors.color1,),onPressed:(){context.pop();}),
         title: Text('Calendario de Pagos'),
         titleTextStyle: AppTextStyles.primaryRegular(color: AppColors.color1),
         backgroundColor: AppColors.color3,

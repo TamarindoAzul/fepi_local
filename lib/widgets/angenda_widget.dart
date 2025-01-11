@@ -1,4 +1,5 @@
 import 'package:fepi_local/database/database_gestor.dart';
+import 'package:fepi_local/routes/getSavedPreferences.dart';
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
 
@@ -20,7 +21,8 @@ class _AgendaWidgetState extends State<AgendaWidget> {
 
   Future<Map<String, List<Map<String, dynamic>>>> _cargarEventos() async {
     final db = DatabaseHelper();
-    final eventos = await db.obtenerActividadesPorUsuario(1);
+    final prefs = await getSavedPreferences();
+    final eventos = await db.obtenerActividadesPorUsuario(prefs['id_Usuario'] ?? 0);
     print (eventos);
     return eventos;
   }
@@ -71,13 +73,14 @@ class _AgendaWidgetState extends State<AgendaWidget> {
           ),
           TextButton(
             onPressed: () async {
+              final prefs = await getSavedPreferences();
               final nuevaActividad = {
-                'id_Usuario': 1, // Asegúrate de incluir el ID de usuario aquí
+                'id_Usuario': prefs['id_Usuario'] ?? 0, // Asegúrate de incluir el ID de usuario aquí
                 'fecha': fechaController.text.trim(),
                 'hora': horaController.text.trim(),
                 'nombreEC': nombreController.text.trim(),
                 'descripcion': descripcionController.text.trim(),
-                'estado': estadoController.text.trim(),
+                'estado': 'activo',
               };
               final bd= await DatabaseHelper(); 
               // Insertar la nueva actividad en la base de datos
@@ -209,6 +212,7 @@ class _AgendaWidgetState extends State<AgendaWidget> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        leading: null,
         title: const Text('Agenda de Actividades'),
         actions: [
           IconButton(

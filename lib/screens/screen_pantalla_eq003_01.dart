@@ -2,6 +2,7 @@ import 'package:fepi_local/constansts/app_buttons.dart';
 import 'package:flutter/material.dart';
 import 'package:fepi_local/constansts/app_colors.dart';
 import 'package:fepi_local/constansts/app_text_styles.dart';
+import 'package:go_router/go_router.dart';
 
 class ScreenPantallaEq00301 extends StatefulWidget {
   static const String routeName = '/screen_pantalla_eq00301';
@@ -51,7 +52,9 @@ class _ScreenPantallaEq00301State extends State<ScreenPantallaEq00301> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      
       appBar: AppBar(
+        leading: IconButton(icon: Icon(Icons.arrow_back_rounded, color: AppColors.color1,),onPressed:(){context.pop();}),
         title: const Text('REGISTRO DE MOBILIARIO POR EC'),
         titleTextStyle: AppTextStyles.primaryRegular(color: AppColors.color1),
         backgroundColor: AppColors.color3,

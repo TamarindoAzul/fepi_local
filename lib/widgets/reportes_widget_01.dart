@@ -1,3 +1,4 @@
+import 'package:fepi_local/routes/getSavedPreferences.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:fepi_local/database/database_gestor.dart';  // Asegúrate de importar la función
@@ -43,10 +44,10 @@ class _ActividadesPageState extends State<ActividadesPage> {
                   // Agregar el reporte al mapa
                   setState(() {
                     reportes.add({
-                      "ID": DateTime.now().millisecondsSinceEpoch.toString(),
+                      "ID": actividad["id_ActividadAcomp"]!,
                       "Reporte": reporteController.text,
                       "Actividad": actividad["Actividad"]!,
-                      "FE": actividad["id_ActividadAcomp"]!,  // Ahora directamente se usa "id_ActividadAcomp"
+                       // Ahora directamente se usa "id_ActividadAcomp"
                       "Fecha": actividad["Fecha"]!,
                     });
 
@@ -64,6 +65,7 @@ class _ActividadesPageState extends State<ActividadesPage> {
 
                   Navigator.pop(context); // Cerrar pop-up
                 }
+                Navigator.pop(context);
               },
               child: Text("Enviar"),
             ),
@@ -78,9 +80,8 @@ class _ActividadesPageState extends State<ActividadesPage> {
     final db = await DatabaseHelper();
 
     // Obtener el idUsuario desde SharedPreferences
-    final prefs = await SharedPreferences.getInstance();
-    idUsuario = prefs.getInt('idUsuario');
-    idUsuario = 1;
+    final prefs = await getSavedPreferences();
+    idUsuario = prefs['id_Usuario'] ?? 0;
 
     if (idUsuario == null) {
       throw Exception("No se encontró el idUsuario en SharedPreferences");

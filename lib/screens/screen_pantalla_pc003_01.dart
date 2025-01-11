@@ -8,6 +8,7 @@ import 'package:sqflite/sqflite.dart';
 import 'package:table_calendar/table_calendar.dart'; // Para el calendario
 import 'package:path_provider/path_provider.dart'; // Para obtener el directorio temporal
 import 'package:flutter_pdfview/flutter_pdfview.dart'; // Paquete para visualizar PDFs
+import 'package:go_router/go_router.dart';
 
 class ScreenPantallaPc00301 extends StatefulWidget {
   static const String routeName = '/screen_pantalla_pc003_01';
@@ -63,6 +64,7 @@ class _PlantillaState extends State<ScreenPantallaPc00301> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        leading: IconButton(icon: Icon(Icons.arrow_back_rounded, color: AppColors.color1,),onPressed:(){context.pop();}),
         title: Text('FECHAS PROMOCION'),
         titleTextStyle: AppTextStyles.primaryRegular(color: AppColors.color1),
         backgroundColor: AppColors.color3,
@@ -91,7 +93,7 @@ class _PlantillaState extends State<ScreenPantallaPc00301> {
                                 width: 30,
                                 height: 30,
                                 decoration: BoxDecoration(
-                                  color: Colors.blue,
+                                  color: AppColors.color3,
                                   shape: BoxShape.circle,
                                 ),
                                 child: Center(

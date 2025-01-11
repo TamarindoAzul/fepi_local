@@ -1,9 +1,11 @@
+import 'package:fepi_local/routes/getSavedPreferences.dart';
 import 'package:flutter/material.dart';
 import 'package:fepi_local/constansts/app_colors.dart';
 import 'package:fepi_local/constansts/app_text_styles.dart';
 import 'package:fepi_local/widgets/card_info.dart';
 import 'package:fepi_local/widgets/search_filter_widget2.dart';
 import 'package:fepi_local/database/database_gestor.dart';
+import 'package:go_router/go_router.dart';
 
 class ScreenPantallaPl004_01 extends StatefulWidget {
   static const String routeName = '/screen_pantalla_pl004_01';
@@ -30,14 +32,17 @@ class _ScreenPantallaPl004_01State extends State<ScreenPantallaPl004_01> {
 
     try {
       await dbHelper.database;
-      var resultFromDb = await dbHelper.getUbicacionPorUsuario(1);
-      var personal = await dbHelper.getResponsablesPorUsuario(4);
+      final prefs = await getSavedPreferences();
+      var resultFromDb = await dbHelper.getUbicacionPorUsuario(prefs['id_Usuario'] ?? 0);
+      var personal = await dbHelper.getResponsablesPorUsuario(prefs['id_Usuario'] ?? 0);
+      print(personal);
 
       setState(() {
         result = resultFromDb ?? {};
         _data = personal.map((item) {
           return item.map((key, value) => MapEntry(key, value.toString()));
         }).toList();
+        print('AAA>>$_data');
         _isLoading = false;
       });
     } catch (e) {
@@ -57,6 +62,7 @@ class _ScreenPantallaPl004_01State extends State<ScreenPantallaPl004_01> {
 
     return Scaffold(
       appBar: AppBar(
+        leading: IconButton(icon: Icon(Icons.arrow_back_rounded, color: AppColors.color1,),onPressed:(){context.pop();}),
         title: const Text('Región para ECAR'),
         titleTextStyle: AppTextStyles.primaryRegular(color: AppColors.color1),
         backgroundColor: AppColors.color3,

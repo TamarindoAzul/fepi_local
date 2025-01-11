@@ -1,17 +1,41 @@
 import 'package:fepi_local/routes/screens.dart';
-import 'package:fepi_local/screens/home_aspirante.dart';
 import 'package:go_router/go_router.dart';
 
 final appRouter = GoRouter(
-  initialLocation: '/screen_pantalla_se001',
+  initialLocation: '/login',
   routes: [
+
     GoRoute(
-      path: '/ScreenPantallaPl003_01',
+      path: '/screen_Inicio_EC',
+      name: InicioEC.routeName,
+      builder: (context, state) => InicioEC(),
+    ),
+    GoRoute(
+      path: '/screen_Inicio_ECAR',
+      name: InicioECAR.routeName,
+      builder: (context, state) => InicioECAR(),
+    ),
+    GoRoute(
+      path: '/screen_Inicio_ECA',
+      name: InicioECA.routeName,
+      builder: (context, state) => InicioECA(),
+    ),
+    GoRoute(
+      path: '/screen_Inicio_APEC',
+      name: InicioAPEC.routeName,
+      builder: (context, state) => InicioAPEC(),
+    ),
+
+
+
+
+    GoRoute(
+      path: '/screen_pantalla_pl003_01',
       name: ScreenPantallaPl003_01.routeName,
       builder: (context, state) => ScreenPantallaPl003_01(),
     ),
      GoRoute(
-      path: '/ScreenPantallaPl004_01',
+      path: '/screen_pantalla_pl004_01',
       name: ScreenPantallaPl004_01.routeName,
       builder: (context, state) => ScreenPantallaPl004_01(),
     ),
@@ -31,11 +55,7 @@ final appRouter = GoRouter(
       name: LoginScreen.routeName,
       builder: (context, state) => LoginScreen(),
     ),
-    GoRoute(
-      path: '/aspirantes_home',
-      name: HomeScreenAsp.routeName,
-      builder: (context, state) => HomeScreenAsp(),
-    ),
+    
     GoRoute(
       path: '/screen_pantalla_se00401',
       name: ScreenPantallaSe00401.routeName,
@@ -93,6 +113,10 @@ final appRouter = GoRouter(
     name: ScreenPantallaSe006_01.routeName,
     builder: (contex , state) => ScreenPantallaSe006_01(),
     ),
+    GoRoute(path: '/screen_pantalla_se006_02',
+    name: ScreenPantallaSe006_02.routeName,
+    builder: (contex , state) => ScreenPantallaSe006_02(),
+    ),
     GoRoute(path: '/screen_pantalla_eq02_02',
     name: FormularioEntrega.routeName,
     builder: (contex , state) => FormularioEntrega()),
@@ -105,6 +129,11 @@ final appRouter = GoRouter(
     GoRoute(path: '/screen_pantalla_be002',
     name: ScreenPantallaBe002.routeName,
     builder: (contex , state) => ScreenPantallaBe002()),
+    GoRoute(
+      path: '/screen_pantalla_cp002',
+      name: ScreenPantallaCp002.routeName,
+      builder: (context, state) => ScreenPantallaCp002(),
+    ),
     GoRoute(path: '/screen_pantalla_pc003_01',
     name: ScreenPantallaPc00301.routeName,
     builder: (context, state) => ScreenPantallaPc00301(),

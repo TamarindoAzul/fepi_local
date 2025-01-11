@@ -1,6 +1,7 @@
 import 'package:fepi_local/constansts/app_colors.dart';
 import 'package:fepi_local/constansts/app_text_styles.dart';
 import 'package:fepi_local/database/database_gestor.dart';
+import 'package:fepi_local/routes/getSavedPreferences.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart'; // Para manejar y formatear fechas
 
@@ -23,7 +24,8 @@ class _ActividadesTableState extends State<ActividadesTable> {
   // Función para cargar las actividades desde la base de datos
   Future<void> _cargarActividades() async {
     final db= await DatabaseHelper();
-    Map<String, Map<String, String>> actividadesCargadas = await db.obtenerActividadesPorNombreEC('Educador Comunitario 12'); // Cambiar el valor según lo que necesites
+    final prefs = await getSavedPreferences();
+    Map<String, Map<String, String>> actividadesCargadas = await db.obtenerActividadesPorNombreEC(prefs['id_Usuario'] ?? 0); // Cambiar el valor según lo que necesites
     setState(() {
       actividades = actividadesCargadas;
     });
